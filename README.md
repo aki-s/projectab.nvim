@@ -14,7 +14,7 @@ with the tab's working directory (`tcd`) set to the project root.
 - Native `tcd` integration — no global `cd`, no LSP/picker disruption
 - Session save/restore: project tabs and buffers survive Neovim restarts
 - Root detection cache (O(1) on hot path, `BufEnter` safe)
-- Optional integrations: snacks.nvim picker, bufferline.nvim groups, project.nvim detection
+- Optional integrations: snacks.nvim picker & dashboard, bufferline.nvim groups, project.nvim detection
 - Built-in tabline (falls back when bufferline is not in use)
 - `:checkhealth projectab` support
 
@@ -44,9 +44,9 @@ with the tab's working directory (`tcd`) set to the project root.
 
     -- Optional integrations (all disabled by default)
     integrations = {
-      snacks = { enabled = false },   -- use snacks.picker.projects for project picking
-      bufferline = false,             -- update bufferline groups on TabEnter
-      project_nvim = false,           -- use project.nvim for root detection
+      snacks     = { enabled = false },  -- use snacks.picker.projects for project picking
+      bufferline = { enabled = false },  -- update bufferline groups on TabEnter
+      project_nvim = false,              -- use project.nvim for root detection
     },
   },
 }
@@ -68,7 +68,7 @@ All integrations are opt-in and gracefully disabled when the plugin is not insta
 
 | Plugin | Purpose |
 |--------|---------|
-| [folke/snacks.nvim](https://github.com/folke/snacks.nvim) | `snacks.picker.projects` for project selection |
+| [folke/snacks.nvim](https://github.com/folke/snacks.nvim) | `snacks.picker.projects` for project selection + dashboard section |
 | [folke/persistence.nvim](https://github.com/folke/persistence.nvim) | Session restore compatible (listens to `SessionLoadPost`) |
 | [akinsho/bufferline.nvim](https://github.com/akinsho/bufferline.nvim) | Per-project buffer grouping in the tabline |
 | [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim) | Alternative project root detection |
@@ -77,15 +77,31 @@ All integrations are opt-in and gracefully disabled when the plugin is not insta
 
 ### Commands
 
+All commands are subcommands of `:ProjecTab`. Tab completion is supported.
+
+**Single-project (`p-` prefix):**
+
 | Command | Description |
 |---------|-------------|
-| `:ProjecTab open <path>` | Open a project in its own tab (or switch to it) |
-| `:ProjecTab pick` | Interactive project picker |
-| `:ProjecTab list` | List all registered projects and their tab IDs |
-| `:ProjecTab save` | Save all project sessions |
-| `:ProjecTab restore` | Restore all project sessions |
-| `:ProjecTab cache-clear` | Clear the root detection cache |
-| `:ProjecTab reorganize` | Consolidate duplicate tabs, move misplaced buffers |
+| `:ProjecTab p-open <path>` | Open a project in its own tab (or switch to it) |
+| `:ProjecTab p-pick` | Interactive project picker |
+| `:ProjecTab p-close` | Save and close the current project tab |
+| `:ProjecTab p-save` | Save the current project session |
+| `:ProjecTab p-restore <path>` | Restore a single project from its saved state |
+| `:ProjecTab p-bnext` | Next buffer in the current project |
+| `:ProjecTab p-bprev` | Previous buffer in the current project |
+
+**Multi-project (`ps-` prefix):**
+
+| Command | Description |
+|---------|-------------|
+| `:ProjecTab ps-list` | List all registered projects and their tab IDs |
+| `:ProjecTab ps-save` | Save all project sessions |
+| `:ProjecTab ps-restore` | Restore all project sessions |
+| `:ProjecTab ps-clear-root-cache` | Clear the root detection cache |
+| `:ProjecTab ps-reorganize` | Consolidate duplicate tabs, move misplaced buffers |
+| `:ProjecTab ps-close-empty-tab` | Close tabs with only unnamed/empty buffers |
+| `:ProjecTab ps-toggle-routing` | Toggle automatic buffer routing on/off |
 | `:checkhealth projectab` | Verify installation and integration status |
 
 ### Default Keymaps
@@ -98,6 +114,8 @@ All integrations are opt-in and gracefully disabled when the plugin is not insta
 | `<leader><TAB>s` | Save current project |
 | `<leader><TAB>r` | Restore a project |
 | `<leader><TAB>c` | Clear root detection cache |
+| `<leader><TAB>F` | Reorganize tabs and buffers |
+| `<leader><TAB>l` | List projects |
 | `<leader><TAB>[` | Previous buffer in project |
 | `<leader><TAB>]` | Next buffer in project |
 
@@ -110,13 +128,11 @@ as `<Plug>` mappings for framework users (LazyVim, etc.).
 local projectab = require("projectab")
 
 -- Open or switch to a project tab
-projectab.open_project("/path/to/project")
+require("projectab.session").project_open("/path/to/project")
 
--- Open project with a callback
-require("projectab.session").open_project("/path/to/project", {
-  callback = function(tab_id)
-    -- runs after the tab is ready
-  end,
+-- Open project with a callback (runs after the tab is ready)
+require("projectab.session").project_open("/path/to/project", {
+  callback = function(tab_id) end,
 })
 
 -- Suspend routing during bulk buffer operations (e.g., custom session restore)
@@ -125,11 +141,99 @@ projectab.suspend()
 projectab.resume()
 
 -- Pick a project interactively
-projectab.pick_project()
+require("projectab.ui.pick").project_pick()
 
 -- Inspect internal state (for debugging)
 projectab._get_state()
 ```
+
+## snacks.nvim Integration
+
+ProjecTab integrates with [folke/snacks.nvim](https://github.com/folke/snacks.nvim)
+for two features: a **project picker** and a **dashboard section**.
+
+### Project Picker
+
+Enable `integrations.snacks.enabled = true` to add a snacks-powered option to
+the `:ProjecTab p-pick` menu. It opens
+[`snacks.picker.projects`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects),
+selects a project, calls `project_open()`, and then launches `snacks.picker.files()`
+in the new project tab.
+
+```lua
+{
+  "aki-s/ProjecTab.nvim",
+  dependencies = { { "folke/snacks.nvim", optional = true } },
+  opts = {
+    integrations = {
+      snacks = {
+        enabled = true,
+        -- Forwarded to snacks.picker.projects()
+        -- ref. https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects
+        pickerProjectsOpts = {
+          recent    = true,
+          max_depth = 3,
+          dev = {
+            "~/git.d/github.com/",
+            "~/git.d/gitlab.com/",
+          },
+        },
+      },
+    },
+  },
+}
+```
+
+### Dashboard Section
+
+`require("projectab.integrations.snacks").dashboard_section(opts)` returns a
+generator function compatible with the
+[snacks.nvim dashboard](https://github.com/folke/snacks.nvim/blob/main/docs/dashboard.md)
+`sections` list. It renders ProjecTab's MRU project history as selectable items;
+selecting one calls `session.project_restore()`.
+
+```lua
+-- Inside your snacks.nvim opts:
+{
+  "folke/snacks.nvim",
+  dependencies = { { "aki-s/ProjecTab.nvim", optional = true } },
+  opts = {
+    dashboard = {
+      sections = {
+        -- ... other sections ...
+        {
+          pane    = 1,
+          height  = 10,
+          indent  = 2,
+          padding = 1,
+          title   = "ProjecTab",
+          -- Generator: returns snacks.dashboard.Item[] from ProjecTab MRU history
+          require("projectab.integrations.snacks").dashboard_section({ limit = 10 }),
+        },
+        -- Optional: keyed action to restore all recent projects
+        {
+          pane   = 1,
+          key    = "R",
+          title  = "ProjecTab: restore all projects",
+          action = function()
+            require("projectab.session").projects_restore({ limit = 3 })
+          end,
+        },
+      },
+    },
+  },
+}
+```
+
+`dashboard_section` options:
+
+| Field    | Type               | Default | Description                                       |
+|----------|--------------------|---------|---------------------------------------------------|
+| `limit`  | `number`           | `5`     | Maximum number of projects to show                |
+| `action` | `fun(dir: string)` | `nil`   | Override item action (default: `project_restore`) |
+
+> **Note:** Disable `ui.dashboard.enabled` in ProjecTab when using the
+> snacks.nvim dashboard, otherwise both dashboards may open on startup.
 
 ## Health Check
 

@@ -17,7 +17,7 @@ function M.setup()
   vim.keymap.set(
     "n",
     "<Plug>(projectab-reorganize)",
-    "<Cmd>ProjecTab reorganize<CR>",
+    "<Cmd>ProjecTab ps-reorganize<CR>",
     { desc = "ProjecTab: Reorganize tabs and buffers" }
   )
   safe_map("n", "<leader><TAB>F", "<Plug>(projectab-reorganize)", { desc = "ProjecTab: Reorganize tabs and buffers" })
@@ -25,33 +25,32 @@ function M.setup()
   vim.keymap.set(
     "n",
     "<Plug>(projectab-restore)",
-    "<Cmd>ProjecTab restore<CR>",
+    "<Cmd>ProjecTab ps-restore<CR>",
     { desc = "ProjecTab: Restore all projects" }
   )
   safe_map("n", "<leader><TAB>R", "<Plug>(projectab-restore)", { desc = "ProjecTab: Restore all projects" })
 
-  vim.keymap.set("n", "<Plug>(projectab-save)", "<Cmd>ProjecTab save<CR>", { desc = "ProjecTab: Save all projects" })
+  vim.keymap.set("n", "<Plug>(projectab-save)", "<Cmd>ProjecTab ps-save<CR>", { desc = "ProjecTab: Save all projects" })
   safe_map("n", "<leader><TAB>S", "<Plug>(projectab-save)", { desc = "ProjecTab: Save all projects" })
 
   vim.keymap.set(
     "n",
     "<Plug>(projectab-cache-clear)",
-    "<Cmd>ProjecTab cache-clear<CR>",
+    "<Cmd>ProjecTab ps-clear-root-cache<CR>",
     { desc = "ProjecTab: Clear cache" }
   )
   safe_map("n", "<leader><TAB>c", "<Plug>(projectab-cache-clear)", { desc = "ProjecTab: Clear cache" })
 
-  -- TODO: delete keybinding for 'projectab-list'
-  vim.keymap.set("n", "<Plug>(projectab-list)", "<Cmd>ProjecTab list<CR>", { desc = "ProjecTab: List projects" })
+  vim.keymap.set("n", "<Plug>(projectab-list)", "<Cmd>ProjecTab ps-list<CR>", { desc = "ProjecTab: List projects" })
   safe_map("n", "<leader><TAB>l", "<Plug>(projectab-list)", { desc = "ProjecTab: List projects" })
 
-  vim.keymap.set("n", "<Plug>(projectab-pick)", "<Cmd>ProjecTab pick_project<CR>", { desc = "ProjecTab: Pick project" })
+  vim.keymap.set("n", "<Plug>(projectab-pick)", "<Cmd>ProjecTab p-pick<CR>", { desc = "ProjecTab: Pick project" })
   safe_map("n", "<leader><TAB>p", "<Plug>(projectab-pick)", { desc = "ProjecTab: Pick project" })
 
   vim.keymap.set(
     "n",
     "<Plug>(projectab-restore-project)",
-    "<Cmd>ProjecTab restore-project<CR>",
+    "<Cmd>ProjecTab p-restore<CR>",
     { desc = "ProjecTab: Restore a project" }
   )
   safe_map("n", "<leader><TAB>r", "<Plug>(projectab-restore-project)", { desc = "ProjecTab: Restore a project" })
@@ -59,7 +58,7 @@ function M.setup()
   vim.keymap.set(
     "n",
     "<Plug>(projectab-save-project)",
-    "<Cmd>ProjecTab save-project<CR>",
+    "<Cmd>ProjecTab p-save<CR>",
     { desc = "ProjecTab: Save current project" }
   )
   safe_map("n", "<leader><TAB>s", "<Plug>(projectab-save-project)", { desc = "ProjecTab: Save current project" })
@@ -68,7 +67,7 @@ function M.setup()
   vim.keymap.set(
     "n",
     "<Plug>(projectab-bnext)",
-    "<Cmd>ProjecTab bnext<CR>",
+    "<Cmd>ProjecTab p-bnext<CR>",
     { desc = "ProjecTab: Next buffer in project" }
   )
   safe_map("n", "<leader><TAB>]", "<Plug>(projectab-bnext)", { desc = "ProjecTab: Next buffer in project" })
@@ -76,7 +75,7 @@ function M.setup()
   vim.keymap.set(
     "n",
     "<Plug>(projectab-bprevious)",
-    "<Cmd>ProjecTab bprevious<CR>",
+    "<Cmd>ProjecTab p-bprev<CR>",
     { desc = "ProjecTab: Previous buffer in project" }
   )
   safe_map("n", "<leader><TAB>[", "<Plug>(projectab-bprevious)", { desc = "ProjecTab: Previous buffer in project" })

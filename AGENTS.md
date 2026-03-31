@@ -30,6 +30,7 @@
 ### Code
 
 - Don't go ahead to writing code without agreed plan.
+- While you are editing code, I might change some code. Ask me if edit conflict has happened.
 - To understand [neovim](https://github.com/neovim/neovim),
   - Read [neovim.github.io](https://github.com/neovim/neovim.github.io/).
   - Read files under `:echo $VIMRUNTIME/doc/`

@@ -33,7 +33,7 @@ ProjecTab.nvim enforces a **"1 project = 1 tab"** rule in Neovim.
   - Neovim >= v0.11.6
 
 Optional integrations (all disabled by default):
-  - snacks.nvim     (project picker via snacks.picker.projects)
+  - snacks.nvim     (project picker via snacks.picker.projects, dashboard section)
   - bufferline.nvim (per-project buffer grouping)
   - project.nvim    (alternative root detection)
   - persistence.nvim (compatible — listens to SessionLoadPost)
@@ -72,9 +72,9 @@ With options: >lua
     },
     integrations = {
       project_nvim = false,
-      bufferline   = false,
+      bufferline   = { enabled = false },
       snacks = {
-        enabled           = false,
+        enabled            = false,
         pickerProjectsOpts = {},
       },
     },
@@ -101,10 +101,16 @@ All options live under the table passed to `setup()`.
 
   Default: `{}`
 
+                                       *projectab-config-directory_picker_func*
+`project.directory_picker_func` (function)
+  Function used to prompt the user for a directory when opening a new project.
+  Signature: `fun(opts: {prompt: string, completion?: string}, callback: fun(input: string?))`
+  Default: `vim.ui.input`
+
                                                    *projectab-config-persistence*
 `project.persistence.enabled` (boolean)
   Enable project session persistence (save/restore buffer list per project).
-  Default: `false`
+  Default: `true`
 
 `project.persistence.dir` (string|nil)
   Override the directory where project JSON files are stored.
@@ -115,7 +121,10 @@ All options live under the table passed to `setup()`.
   Show a built-in startup dashboard listing recent projects when Neovim starts
   with no arguments. Default: `false`
 
-`ui.dashboard.header` (string[])
+  Note: Disable this when using snacks.nvim dashboard with the ProjecTab
+  dashboard section (see |projectab-snacks-dashboard|).
+
+`ui.dashboard.header` (string[])`
   Lines to display as the dashboard header. Default: `{ "ProjecTab" }`
 
                                                           *projectab-config-debug*
@@ -146,45 +155,57 @@ All options live under the table passed to `setup()`.
 
 All commands are subcommands of `:ProjecTab`. Tab completion is supported.
 
-`:ProjecTab open {path}`                               *:ProjecTab-open*
+Single-project commands (prefix `p-`):
+
+`:ProjecTab p-open {path}`                             *:ProjecTab-p-open*
   Open a project in its own tab. If the project is already open, switch to it.
   `{path}` can be a file or directory within the project.
 
-`:ProjecTab pick`                                      *:ProjecTab-pick*
+`:ProjecTab p-pick`                                    *:ProjecTab-p-pick*
   Open an interactive project picker (`vim.ui.select`).
   Shows currently open projects and history. Also exposes snacks integration
   if enabled.
 
-`:ProjecTab list`                                      *:ProjecTab-list*
-  List all registered projects and their tab IDs via `vim.notify`.
+`:ProjecTab p-close`                                   *:ProjecTab-p-close*
+  Save and close the current project tab.
 
-`:ProjecTab save`                                      *:ProjecTab-save*
-  Save session state for all open projects.
-
-`:ProjecTab restore`                                   *:ProjecTab-restore*
-  Restore all projects from persistence history.
-
-`:ProjecTab save-project`                              *:ProjecTab-save-project*
+`:ProjecTab p-save`                                    *:ProjecTab-p-save*
   Save session state for the current project tab only.
 
-`:ProjecTab restore-project {path}`                    *:ProjecTab-restore-project*
+`:ProjecTab p-restore {path}`                          *:ProjecTab-p-restore*
   Restore a single project from its saved state.
 
-`:ProjecTab cache-clear`                               *:ProjecTab-cache-clear*
+Multi-project commands (prefix `ps-`):
+
+`:ProjecTab ps-list`                                   *:ProjecTab-ps-list*
+  List all registered projects and their tab IDs via `vim.notify`.
+
+`:ProjecTab ps-save`                                   *:ProjecTab-ps-save*
+  Save session state for all open projects.
+
+`:ProjecTab ps-restore`                                *:ProjecTab-ps-restore*
+  Restore all projects from persistence history.
+
+`:ProjecTab ps-clear-root-cache`                       *:ProjecTab-ps-clear-root-cache*
   Clear the root detection cache. Use this after `git init` or other
   structural changes to the project directory.
 
-`:ProjecTab reorganize`                                *:ProjecTab-reorganize*
+`:ProjecTab ps-reorganize`                             *:ProjecTab-ps-reorganize*
   Consolidate duplicate project tabs and move misplaced buffers to their
   correct project tabs.
 
-`:ProjecTab cleanup-empty-tabs`                        *:ProjecTab-cleanup-empty-tabs*
+`:ProjecTab ps-close-empty-tab`                        *:ProjecTab-ps-close-empty-tab*
   Close tabs that contain only unnamed/empty buffers. Preserves the last tab.
 
-`:ProjecTab bnext`                                     *:ProjecTab-bnext*
+`:ProjecTab ps-toggle-routing`                         *:ProjecTab-ps-toggle-routing*
+  Toggle automatic buffer routing on/off globally.
+
+Navigation commands (prefix `p-`):
+
+`:ProjecTab p-bnext`                                   *:ProjecTab-p-bnext*
   Navigate to the next listed buffer belonging to the current project.
 
-`:ProjecTab bprevious`                                 *:ProjecTab-bprevious*
+`:ProjecTab p-bprev`                                   *:ProjecTab-p-bprev*
   Navigate to the previous listed buffer belonging to the current project.
 
 ================================================================================
@@ -199,20 +220,22 @@ Default fallback keymaps (only set if the key is not already mapped):
   `<leader><TAB>r`  →  Restore a project
   `<leader><TAB>c`  →  Clear root detection cache
   `<leader><TAB>F`  →  Reorganize tabs and buffers
+  `<leader><TAB>l`  →  List projects
   `<leader><TAB>[`  →  Previous buffer in project
   `<leader><TAB>]`  →  Next buffer in project
 
 All actions are also available as `<Plug>` mappings:    *projectab-plug-mappings*
 
-  `<Plug>(projectab-pick)`          Pick project
-  `<Plug>(projectab-save)`          Save all projects
-  `<Plug>(projectab-restore)`       Restore all projects
-  `<Plug>(projectab-save-project)`  Save current project
+  `<Plug>(projectab-pick)`           Pick project
+  `<Plug>(projectab-save)`           Save all projects
+  `<Plug>(projectab-restore)`        Restore all projects
+  `<Plug>(projectab-save-project)`   Save current project
   `<Plug>(projectab-restore-project)` Restore a project
-  `<Plug>(projectab-cache-clear)`   Clear cache
-  `<Plug>(projectab-reorganize)`    Reorganize tabs/buffers
-  `<Plug>(projectab-bnext)`         Next buffer in project
-  `<Plug>(projectab-bprevious)`     Previous buffer in project
+  `<Plug>(projectab-cache-clear)`    Clear cache
+  `<Plug>(projectab-reorganize)`     Reorganize tabs/buffers
+  `<Plug>(projectab-list)`           List projects
+  `<Plug>(projectab-bnext)`          Next buffer in project
+  `<Plug>(projectab-bprevious)`      Previous buffer in project
 
 ================================================================================
 7. PUBLIC API                                                   *projectab-api*
@@ -230,12 +253,8 @@ All actions are also available as `<Plug>` mappings:    *projectab-plug-mappings
 `require("projectab").resume()`
   Resume automatic buffer routing after `suspend()`.
 
-                                                       *projectab.pick_project()*
-`require("projectab").pick_project()`
-  Open the interactive project picker (`vim.ui.select`).
-
-                                                      *projectab.open_project()*
-`require("projectab.session").open_project({path}, {opts})`
+                                                      *projectab.project_open()*
+`require("projectab.session").project_open({path}, {opts})`
   Open or switch to the project tab for `{path}`.
 
   Parameters:
@@ -244,6 +263,10 @@ All actions are also available as `<Plug>` mappings:    *projectab-plug-mappings
              - `callback` (function): called with `tab_id` after the tab is ready.
              - `edit` (boolean): set to `false` to skip opening the file/directory.
                                  Useful when restoring sessions.
+
+                                                     *projectab.project_pick()*
+`require("projectab.ui.pick").project_pick()`
+  Open the interactive project picker (`vim.ui.select`).
 
                                                          *projectab._get_state()*
 `require("projectab")._get_state()`
@@ -290,7 +313,7 @@ Module structure: >
   ├── log.lua               Debug logging
   ├── session.lua           Save/restore project state
   ├── persistence.lua       JSON file I/O
-  ├── cleanup.lua           Tab cleanup (close_empty_tabs, reorganize)
+  ├── cleanup.lua           Tab cleanup (projects_close_empty_tab, projects_reorganize)
   ├── navigate.lua          Project-scoped bnext/bprevious
   ├── health.lua            :checkhealth handler
   ├── ui/
