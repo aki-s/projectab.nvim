@@ -5,6 +5,7 @@ local M = {}
 
 local state = require("projectab.state")
 local buffer = require("projectab.buffer")
+local notify = require("projectab.ui.notify")
 
 --- Get sorted list of valid, listed buffers belonging to the given project root.
 --- @param project_root string The project root path
@@ -51,7 +52,7 @@ function M.project_bnext()
   local project_root = state.get_project(current_tab)
 
   if not project_root then
-    vim.notify("[ProjecTab] Current tab has no assigned project", vim.log.levels.WARN)
+    notify("Current tab has no assigned project", vim.log.levels.WARN)
     return
   end
 
@@ -84,7 +85,7 @@ function M.project_bprevious()
   local project_root = state.get_project(current_tab)
 
   if not project_root then
-    vim.notify("[ProjecTab] Current tab has no assigned project", vim.log.levels.WARN)
+    notify("Current tab has no assigned project", vim.log.levels.WARN)
     return
   end
 

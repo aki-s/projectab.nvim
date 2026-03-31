@@ -10,6 +10,7 @@ local M = {}
 
 local log = require("projectab.log")
 local state = require("projectab.state")
+local notify = require("projectab.ui.notify")
 
 --- Close tabs that only contain unnamed/empty buffers.
 --- Preserves at least one tab (never closes the last tab).
@@ -95,7 +96,7 @@ function M.projects_reorganize()
   local msg = string.format("Reorganized: %d duplicate tab(s) closed, buffers moved to correct tabs", consolidated)
   log.debug_ctx(msg)
   if consolidated > 0 then
-    vim.notify("[ProjecTab] " .. msg, vim.log.levels.INFO)
+    notify(msg, vim.log.levels.INFO)
   end
 
   return { consolidated = consolidated }

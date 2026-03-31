@@ -9,6 +9,7 @@ function M.project_pick()
   local config = require("projectab.config")
   local state = require("projectab.state")
   local log = require("projectab.log")
+  local notify = require("projectab.ui.notify")
 
   local projects = state.list_projects()
 
@@ -70,7 +71,7 @@ function M.project_pick()
     elseif selected.is_history then
       local history = require("projectab.session").list_history()
       if not history or #history == 0 then
-        vim.notify("[ProjecTab] No project history found", vim.log.levels.INFO)
+        notify("No project history found", vim.log.levels.INFO)
         return
       end
 
@@ -94,7 +95,7 @@ function M.project_pick()
       if ok then
         snacks_int.pick_new_project(session.project_open, config.values.integrations.snacks.pickerProjectsOpts)
       else
-        vim.notify("[ProjecTab] Failed to load snacks integration", vim.log.levels.ERROR)
+        notify("Failed to load snacks integration", vim.log.levels.ERROR)
       end
     else
       -- Switch to existing project tab

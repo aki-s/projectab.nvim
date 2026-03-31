@@ -20,17 +20,18 @@ local CMD_PROJECT_SAVE = "p-save"
 --- Register user commands
 function M.setup()
   local state = require("projectab.state")
+  local notify = require("projectab.ui.notify")
 
   -- User commands
   vim.api.nvim_create_user_command("ProjecTab", function(cmd_opts)
     local subcmd = cmd_opts.fargs[1]
     if subcmd == CMD_PROJECTS_CLEAR_ROOT_CACHE then
       require("projectab.detect").projects_clear_root_cache()
-      vim.notify("[ProjecTab] Root detection cache cleared", vim.log.levels.INFO)
+      notify("Root detection cache cleared", vim.log.levels.INFO)
     elseif subcmd == CMD_PROJECTS_CLOSE_EMPTY_TAB then
       local cleanup = require("projectab.cleanup")
       local count = cleanup.projects_close_empty_tab()
-      vim.notify(string.format("[ProjecTab] Closed %d empty tab(s)", count), vim.log.levels.INFO)
+      notify(string.format("Closed %d empty tab(s)", count), vim.log.levels.INFO)
     elseif subcmd == CMD_PROJECTS_LIST then
       local projects = state.list_projects()
       if next(projects) then
@@ -41,7 +42,7 @@ function M.setup()
         end
         vim.notify(table.concat(tbl, "\n"), vim.log.levels.INFO)
       else
-        vim.notify("[ProjecTab] No project is opened", vim.log.levels.INFO)
+        notify("No project is opened", vim.log.levels.INFO)
       end
     elseif subcmd == CMD_PROJECTS_REORGANIZE then
       require("projectab.cleanup").projects_reorganize()
@@ -51,10 +52,10 @@ function M.setup()
     elseif subcmd == CMD_PROJECTS_SAVE then
       local session = require("projectab.session")
       session.projects_save()
-      vim.notify("[ProjecTab] All projects saved", vim.log.levels.INFO)
+      notify("All projects saved", vim.log.levels.INFO)
     elseif subcmd == CMD_PROJECTS_TOGGLE_ROUTING then
       local ret = require("projectab.buffer").routing_toggle()
-      vim.notify(string.format("[ProjecTab] buffer routing is %q", ret))
+      notify(string.format("buffer routing is %q", ret))
     elseif subcmd == CMD_PROJECT_BNEXT then
       require("projectab.navigate").project_bnext()
     elseif subcmd == CMD_PROJECT_BPREV then
@@ -67,7 +68,7 @@ function M.setup()
       if path then
         require("projectab.session").project_open(path)
       else
-        vim.notify(string.format("[ProjecTab] Usage: :ProjecTab %s <path>", CMD_PROJECT_OPEN), vim.log.levels.WARN)
+        notify(string.format("Usage: :ProjecTab %s <path>", CMD_PROJECT_OPEN), vim.log.levels.WARN)
       end
     elseif subcmd == CMD_PROJECT_PICK then
       require("projectab.ui.pick").project_pick()
@@ -77,7 +78,7 @@ function M.setup()
         local session = require("projectab.session")
         session.project_restore(vim.fn.expand(path))
       else
-        vim.notify(string.format("[ProjecTab] Usage: :ProjecTab %s <path>", CMD_PROJECT_RESTORE), vim.log.levels.WARN)
+        notify(string.format("Usage: :ProjecTab %s <path>", CMD_PROJECT_RESTORE), vim.log.levels.WARN)
       end
     elseif subcmd == CMD_PROJECT_SAVE then
       local tab_id = vim.api.nvim_get_current_tabpage()
@@ -85,14 +86,14 @@ function M.setup()
       if root then
         local session = require("projectab.session")
         session.project_save(root, tab_id)
-        vim.notify("[ProjecTab] Saved: " .. root, vim.log.levels.INFO)
+        notify("Saved: " .. root, vim.log.levels.INFO)
       else
-        vim.notify("[ProjecTab] Current tab has no registered project", vim.log.levels.WARN)
+        notify("Current tab has no registered project", vim.log.levels.WARN)
       end
     else
-      vim.notify(
+      notify(
         string.format(
-          "[ProjecTab] Subcommands: %s | %s | %s | %s | %s | %s | %s| %s | %s | %s <path> | %s | %s <path> | %s | %s",
+          "Subcommands: %s | %s | %s | %s | %s | %s | %s| %s | %s | %s <path> | %s | %s <path> | %s | %s",
           CMD_PROJECTS_CLEAR_ROOT_CACHE,
           CMD_PROJECTS_CLOSE_EMPTY_TAB,
           CMD_PROJECTS_LIST,

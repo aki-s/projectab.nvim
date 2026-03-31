@@ -18,6 +18,7 @@ local M = {}
 local log = require("projectab.log")
 local persistence = require("projectab.persistence")
 local state = require("projectab.state")
+local notify = require("projectab.ui.notify")
 
 --- Collect the buffer list for a given tab.
 --- Only includes normal file buffers (buftype == "") with non-empty names.
@@ -98,7 +99,7 @@ function M.project_open(path, opts)
   -- Resolve project root from the given path (works for both files and directories)
   local project_root = buffer.resolve_project_root_from_path(target_path)
   if not project_root then
-    vim.notify(string.format("[ProjecTab] No project root found for: %s", target_path), vim.log.levels.ERROR)
+    notify(string.format("No project root found for: %s", target_path), vim.log.levels.ERROR)
     return
   end
 
@@ -213,7 +214,7 @@ function M.project_restore(root)
     local dashboard = persistence.load_dashboard()
     dashboard = persistence.remove_from_history(dashboard, root)
     persistence.save_dashboard(dashboard)
-    vim.notify("[ProjecTab] Project no longer exists, removed: " .. root, vim.log.levels.WARN)
+    notify("Project no longer exists, removed: " .. root, vim.log.levels.WARN)
     return false
   end
 
@@ -302,7 +303,7 @@ function M.projects_restore(opts)
 
   if not ok then
     log.debug_ctx("session: error during restore_all: " .. tostring(err))
-    vim.notify("[ProjecTab] Error during restore: " .. tostring(err), vim.log.levels.ERROR)
+    notify("Error during restore: " .. tostring(err), vim.log.levels.ERROR)
   end
 
   log.debug_ctx(string.format("session: restore_all complete, restored=%d", restored))

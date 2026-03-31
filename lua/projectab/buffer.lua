@@ -12,6 +12,7 @@ local M = {}
 local config = require("projectab.config")
 local detect = require("projectab.detect")
 local log = require("projectab.log")
+local notify = require("projectab.ui.notify")
 local state = require("projectab.state")
 
 --- Try to open netrw via Explore, but gracefully fallback to enew if netrw is disabled
@@ -232,7 +233,7 @@ function M.handle_buf_enter(bufnr)
 
   if not ok then
     log.debug_ctx("buffer: routing error: " .. tostring(err))
-    vim.notify("[ProjecTab] Error during buffer routing: " .. tostring(err), vim.log.levels.ERROR)
+    notify("Error during buffer routing: " .. tostring(err), vim.log.levels.ERROR)
   elseif allocated_tab_id and allocated_tab_id ~= current_tab_id then
     -- Clean up the source window if we moved the buffer to a different tab,
     -- which happens when users do e.g., `:vsplit /other_project_file`.
@@ -408,7 +409,7 @@ function M.clean_misplaced_buffers()
 
   if not restore_ok then
     log.debug_ctx("cleanup: error during misplaced buffer cleanup: " .. tostring(restore_err))
-    vim.notify("[ProjecTab] Error during misplaced buffer cleanup: " .. tostring(restore_err), vim.log.levels.ERROR)
+    notify("Error during misplaced buffer cleanup: " .. tostring(restore_err), vim.log.levels.ERROR)
   end
 end
 
