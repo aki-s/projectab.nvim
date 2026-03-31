@@ -92,10 +92,11 @@ function M.projects_reorganize()
   -- Step 2: Clean misplaced buffers
   buffer.clean_misplaced_buffers()
 
-  local msg =
-    string.format("[ProjecTab] Reorganized: %d duplicate tab(s) closed, buffers moved to correct tabs", consolidated)
-  vim.notify(msg, vim.log.levels.INFO)
+  local msg = string.format("Reorganized: %d duplicate tab(s) closed, buffers moved to correct tabs", consolidated)
   log.debug_ctx(msg)
+  if consolidated > 0 then
+    vim.notify("[ProjecTab] " .. msg, vim.log.levels.INFO)
+  end
 
   return { consolidated = consolidated }
 end
