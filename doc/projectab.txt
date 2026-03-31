@@ -1,0 +1,315 @@
+*projectab.txt*    Neovim plugin to manage projects via tabs efficiently.
+
+================================================================================
+CONTENTS                                                     *projectab-contents*
+
+  1. Introduction ............... |projectab-introduction|
+  2. Requirements ............... |projectab-requirements|
+  3. Setup ...................... |projectab-setup|
+  4. Configuration .............. |projectab-configuration|
+  5. Commands ................... |projectab-commands|
+  6. Keymaps .................... |projectab-keymaps|
+  7. Public API ................. |projectab-api|
+  8. Health Check ............... |projectab-health|
+  9. Architecture ............... |projectab-architecture|
+ 10. Known Issues ............... |projectab-known-issues|
+
+================================================================================
+1. INTRODUCTION                                          *projectab-introduction*
+
+ProjecTab.nvim enforces a **"1 project = 1 tab"** rule in Neovim.
+
+  - When you open a file belonging to a project, it is displayed in that
+    project's dedicated tab.
+  - If no tab exists for the project yet, the current tab is claimed (if
+    unclaimed) or a new tab is created.
+  - The tab's local working directory (`tcd`) is always set to the project root.
+  - Special buffers (quickfix, help, terminal, etc.) are never routed.
+  - Session save/restore lets project tabs survive Neovim restarts.
+
+================================================================================
+2. REQUIREMENTS                                          *projectab-requirements*
+
+  - Neovim >= v0.11.6
+
+Optional integrations (all disabled by default):
+  - snacks.nvim     (project picker via snacks.picker.projects)
+  - bufferline.nvim (per-project buffer grouping)
+  - project.nvim    (alternative root detection)
+  - persistence.nvim (compatible — listens to SessionLoadPost)
+
+================================================================================
+3. SETUP                                                        *projectab-setup*
+
+Minimal setup (call once, typically in your plugin manager's `config`): >lua
+
+  require("projectab").setup()
+<
+
+With options: >lua
+
+  require("projectab").setup({
+    project = {
+      root_markers = {
+        ".git", ".hg", ".jj",
+        "go.mod", "package.json", "pyproject.toml", "Cargo.toml",
+      },
+      excluded_root_dirs = {},
+      persistence = {
+        enabled = true,
+        dir = nil,  -- defaults to stdpath("data") .. "/projectab"
+      },
+    },
+    ui = {
+      dashboard = {
+        enabled = false,  -- show a startup dashboard with recent projects
+        header = { "ProjecTab" },
+      },
+    },
+    debug = {
+      file   = false,   -- write logs to stdpath("cache")/projectab.log
+      notify = false,   -- show logs via vim.notify
+    },
+    integrations = {
+      project_nvim = false,
+      bufferline   = false,
+      snacks = {
+        enabled           = false,
+        pickerProjectsOpts = {},
+      },
+    },
+  })
+<
+
+================================================================================
+4. CONFIGURATION                                        *projectab-configuration*
+
+All options live under the table passed to `setup()`.
+
+                                                  *projectab-config-root_markers*
+`project.root_markers` (string[])
+  List of file/directory names used to detect project roots.
+  Detection uses "nearest root wins" — walks upward from the file's directory
+  and returns the first (deepest) match.
+
+  Default includes: `.git`, `.hg`, `.jj`, `.svn`, `go.mod`, `package.json`,
+  `pyproject.toml`, `Cargo.toml`, `Gemfile`, and more.
+
+                                            *projectab-config-excluded_root_dirs*
+`project.excluded_root_dirs` (string[])
+  Directory paths to skip during root detection traversal. Supports `~` expansion.
+
+  Default: `{}`
+
+                                                   *projectab-config-persistence*
+`project.persistence.enabled` (boolean)
+  Enable project session persistence (save/restore buffer list per project).
+  Default: `false`
+
+`project.persistence.dir` (string|nil)
+  Override the directory where project JSON files are stored.
+  Default: `stdpath("data") .. "/projectab"`
+
+                                                      *projectab-config-dashboard*
+`ui.dashboard.enabled` (boolean)
+  Show a built-in startup dashboard listing recent projects when Neovim starts
+  with no arguments. Default: `false`
+
+`ui.dashboard.header` (string[])
+  Lines to display as the dashboard header. Default: `{ "ProjecTab" }`
+
+                                                          *projectab-config-debug*
+`debug.file` (boolean)
+  Write debug logs to `stdpath("cache")/projectab.log`. Default: `false`
+
+`debug.notify` (boolean)
+  Show debug messages via `vim.notify`. Default: `false`
+
+                                               *projectab-config-integrations*
+`integrations.project_nvim` (boolean)
+  Use `project.nvim` API for root detection (fallback to native if absent).
+  Default: `false`
+
+`integrations.bufferline.enabled` (boolean)
+  Update bufferline.nvim groups on every `TabEnter`. Default: `false`
+
+`integrations.snacks.enabled` (boolean)
+  Enable snacks.nvim integration for interactive project picking.
+  Default: `false`
+
+`integrations.snacks.pickerProjectsOpts` (table)
+  Extra options forwarded to `snacks.picker.projects()` (e.g., `recent`,
+  `max_depth`, `dev`). Default: `{}`
+
+================================================================================
+5. COMMANDS                                                  *projectab-commands*
+
+All commands are subcommands of `:ProjecTab`. Tab completion is supported.
+
+`:ProjecTab open {path}`                               *:ProjecTab-open*
+  Open a project in its own tab. If the project is already open, switch to it.
+  `{path}` can be a file or directory within the project.
+
+`:ProjecTab pick`                                      *:ProjecTab-pick*
+  Open an interactive project picker (`vim.ui.select`).
+  Shows currently open projects and history. Also exposes snacks integration
+  if enabled.
+
+`:ProjecTab list`                                      *:ProjecTab-list*
+  List all registered projects and their tab IDs via `vim.notify`.
+
+`:ProjecTab save`                                      *:ProjecTab-save*
+  Save session state for all open projects.
+
+`:ProjecTab restore`                                   *:ProjecTab-restore*
+  Restore all projects from persistence history.
+
+`:ProjecTab save-project`                              *:ProjecTab-save-project*
+  Save session state for the current project tab only.
+
+`:ProjecTab restore-project {path}`                    *:ProjecTab-restore-project*
+  Restore a single project from its saved state.
+
+`:ProjecTab cache-clear`                               *:ProjecTab-cache-clear*
+  Clear the root detection cache. Use this after `git init` or other
+  structural changes to the project directory.
+
+`:ProjecTab reorganize`                                *:ProjecTab-reorganize*
+  Consolidate duplicate project tabs and move misplaced buffers to their
+  correct project tabs.
+
+`:ProjecTab cleanup-empty-tabs`                        *:ProjecTab-cleanup-empty-tabs*
+  Close tabs that contain only unnamed/empty buffers. Preserves the last tab.
+
+`:ProjecTab bnext`                                     *:ProjecTab-bnext*
+  Navigate to the next listed buffer belonging to the current project.
+
+`:ProjecTab bprevious`                                 *:ProjecTab-bprevious*
+  Navigate to the previous listed buffer belonging to the current project.
+
+================================================================================
+6. KEYMAPS                                                    *projectab-keymaps*
+
+Default fallback keymaps (only set if the key is not already mapped):
+
+  `<leader><TAB>p`  →  Pick project
+  `<leader><TAB>S`  →  Save all projects
+  `<leader><TAB>R`  →  Restore all projects
+  `<leader><TAB>s`  →  Save current project
+  `<leader><TAB>r`  →  Restore a project
+  `<leader><TAB>c`  →  Clear root detection cache
+  `<leader><TAB>F`  →  Reorganize tabs and buffers
+  `<leader><TAB>[`  →  Previous buffer in project
+  `<leader><TAB>]`  →  Next buffer in project
+
+All actions are also available as `<Plug>` mappings:    *projectab-plug-mappings*
+
+  `<Plug>(projectab-pick)`          Pick project
+  `<Plug>(projectab-save)`          Save all projects
+  `<Plug>(projectab-restore)`       Restore all projects
+  `<Plug>(projectab-save-project)`  Save current project
+  `<Plug>(projectab-restore-project)` Restore a project
+  `<Plug>(projectab-cache-clear)`   Clear cache
+  `<Plug>(projectab-reorganize)`    Reorganize tabs/buffers
+  `<Plug>(projectab-bnext)`         Next buffer in project
+  `<Plug>(projectab-bprevious)`     Previous buffer in project
+
+================================================================================
+7. PUBLIC API                                                   *projectab-api*
+
+                                                              *projectab.setup()*
+`require("projectab").setup({opts})`
+  Initialize the plugin. Must be called once.
+
+                                                            *projectab.suspend()*
+`require("projectab").suspend()`
+  Suspend automatic buffer routing globally. Use before bulk buffer operations
+  (e.g., custom session restore) that do not set `vim.g.SessionLoad`.
+
+                                                             *projectab.resume()*
+`require("projectab").resume()`
+  Resume automatic buffer routing after `suspend()`.
+
+                                                       *projectab.pick_project()*
+`require("projectab").pick_project()`
+  Open the interactive project picker (`vim.ui.select`).
+
+                                                      *projectab.open_project()*
+`require("projectab.session").open_project({path}, {opts})`
+  Open or switch to the project tab for `{path}`.
+
+  Parameters:
+    {path}   Absolute path to a file or directory within the project.
+    {opts}   Optional table:
+             - `callback` (function): called with `tab_id` after the tab is ready.
+             - `edit` (boolean): set to `false` to skip opening the file/directory.
+                                 Useful when restoring sessions.
+
+                                                         *projectab._get_state()*
+`require("projectab")._get_state()`
+  Return a deep copy of the internal state table (for debugging).
+  Returns a `ProjectabState` table with `project_to_tab` and `tab_to_project` maps.
+
+================================================================================
+8. HEALTH CHECK                                               *projectab-health*
+
+Run `:checkhealth projectab` to verify:
+
+  - Neovim version requirement (>= 0.11.6)
+  - Configuration loaded successfully
+  - Each enabled integration (project.nvim, bufferline.nvim, snacks.nvim)
+    is available
+  - Persistence directory exists and is writable
+
+================================================================================
+9. ARCHITECTURE                                          *projectab-architecture*
+
+Design principles:
+
+1. "1 project = 1 tab" rule — each project root maps to exactly one tab.
+2. `tcd` as persistence, maps as runtime cache — `register()` is the single
+   entry point that sets both the bidirectional maps and `tcd`. After session
+   restore, maps are rebuilt from `tcd` (preserved by `:mksession`) with
+   buffer detection as fallback.
+3. Root detection cache — `detect.get_root()` caches results per directory.
+   Cache hit is O(1), eliminating repeated `fs_stat` syscalls on `BufEnter`.
+4. Reentrancy safety — module-local `is_routing` lock prevents recursive
+   `BufEnter` cascades. `suspend()`/`resume()` API for bulk operations.
+
+Module structure: >
+  lua/projectab/
+  ├── init.lua              Public API entry point
+  ├── init/
+  │   ├── autocmd.lua       Autocmd registrations
+  │   ├── command.lua       :ProjecTab user command
+  │   └── keymap.lua        <Plug> and default keymaps
+  ├── state.lua             Bidirectional project↔tab mapping
+  ├── buffer.lua            Buffer routing + clean_misplaced_buffers()
+  ├── detect.lua            Root detection + cache
+  ├── config.lua            Default options + merge
+  ├── log.lua               Debug logging
+  ├── session.lua           Save/restore project state
+  ├── persistence.lua       JSON file I/O
+  ├── cleanup.lua           Tab cleanup (close_empty_tabs, reorganize)
+  ├── navigate.lua          Project-scoped bnext/bprevious
+  ├── health.lua            :checkhealth handler
+  ├── ui/
+  │   ├── tabline.lua       Built-in tabline renderer
+  │   ├── winbar.lua        Per-window winbar
+  │   ├── dashboard.lua     Startup dashboard
+  │   └── pick.lua          vim.ui.select project picker
+  └── integrations/
+      ├── bufferline.lua    bufferline.nvim groups
+      ├── project_nvim.lua  project.nvim root detection
+      └── snacks.lua        snacks.nvim picker + dashboard section
+<
+
+================================================================================
+10. KNOWN ISSUES                                          *projectab-known-issues*
+
+  - When project A opens a file that belongs to project B, the file is routed
+    to project B's tab correctly, but the buffer may also remain visible in
+    project A's buffer list until Neovim is restarted.
+
+================================================================================
+vim:tw=78:ts=8:ft=help:norl:
