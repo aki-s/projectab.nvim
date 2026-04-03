@@ -310,10 +310,20 @@ function M.projects_restore(opts)
 end
 
 --- Return a list of historically accessed project roots from persistence.
+--- @param opts? { limit?: integer } Optional options. `limit` caps the number of entries returned.
 --- @return string[] history
-function M.list_history()
+function M.list_history(opts)
+  opts = opts or {}
   local dashboard = persistence.load_dashboard()
-  return dashboard.history or {}
+  local history = dashboard.history or {}
+  if opts.limit and opts.limit < #history then
+    local result = {}
+    for i = 1, opts.limit do
+      result[i] = history[i]
+    end
+    return result
+  end
+  return history
 end
 
 return M

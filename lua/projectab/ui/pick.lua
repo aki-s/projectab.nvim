@@ -69,7 +69,7 @@ function M.project_pick()
         end
       )
     elseif selected.is_history then
-      local history = require("projectab.session").list_history()
+      local history = require("projectab.session").list_history({ limit = 50 })
       if not history or #history == 0 then
         notify("No project history found", vim.log.levels.INFO)
         return
