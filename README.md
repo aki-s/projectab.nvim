@@ -1,6 +1,6 @@
 # ProjecTab.nvim
 
-[![CI](https://github.com/aki-s/ProjecTab.nvim/actions/workflows/ci.yml/badge.svg)](https://github.com/aki-s/ProjecTab.nvim/actions/workflows/ci.yml)
+[![CI](https://github.com/aki-s/ProjecTab.nvim/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/aki-s/ProjecTab.nvim/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Neovim plugin to manage projects via tabs efficiently.

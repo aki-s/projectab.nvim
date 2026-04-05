@@ -54,6 +54,9 @@ function M.setup()
   -- ======================================================================
   -- Refresh state after a session finishes loading (e.g. via persistence.nvim).
   -- Clean up misplaced buffers enforcing 1 project = 1 tab.
+  -- At the very end of any standard Neovim session file,
+  --   Neovim automatically runs the command doautoall SessionLoadPost.
+  --   The doautoall command executes the given autocmd across every single loaded buffer.
   vim.api.nvim_create_autocmd("SessionLoadPost", {
     group = augroup,
     callback = function(_)
