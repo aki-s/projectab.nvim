@@ -26,6 +26,7 @@
 - Write documents in English.
 - Use Mermaid to make dependency or architecture clear for human.
 - Don't forget to update ./doc/projectab.md and ./doc/projectab.txt to be consistent with source code.
+  - You are allwed to change doc at the last phase of task, because the change policy could change during task.
 
 ### Code
 
