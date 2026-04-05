@@ -9,6 +9,20 @@
 --- @class ProjectabPersistenceModule
 local M = {}
 
+--- @class ProjectabDashboard
+--- @field history string[] List of project roots in MRU order
+--- @field version number Schema version
+
+--- @class ProjectabProjectState
+--- @field active_buffer string|nil Absolute path to the last active buffer
+--- @field buffers string[] List of absolute buffer paths
+
+--- @class ProjectabProjectData
+--- @field last_saved integer Timestamp of last save (UNIX time)
+--- @field root string Absolute path to project root
+--- @field state ProjectabProjectState Per-project buffer state
+--- @field version number Schema version
+
 local log = require("projectab.log")
 local config = require("projectab.config")
 
@@ -97,8 +111,9 @@ end
 
 --- Load dashboard.json.
 --- Returns a default structure if the file does not exist.
---- @return table dashboard { version: number, history: string[] }
+--- @return ProjectabDashboard dashboard
 function M.load_dashboard()
+  --- @type ProjectabDashboard|nil
   local data = M.read_json(M.get_dashboard_path())
   if data and data.version then
     return data
@@ -107,7 +122,7 @@ function M.load_dashboard()
 end
 
 --- Save dashboard.json.
---- @param dashboard table { version: number, history: string[] }
+--- @param dashboard ProjectabDashboard
 --- @return boolean success
 function M.save_dashboard(dashboard)
   return M.write_json(M.get_dashboard_path(), dashboard)
@@ -116,14 +131,14 @@ end
 --- Load per-project state from its JSON file.
 --- Returns nil if the file does not exist.
 --- @param root string Project root (absolute path)
---- @return table|nil project_data
+--- @return ProjectabProjectData|nil project_data
 function M.load_project(root)
   return M.read_json(M.get_project_path(root))
 end
 
 --- Save per-project state to its JSON file.
 --- @param root string Project root (absolute path)
---- @param data table Project state data
+--- @param data ProjectabProjectData Project state data
 --- @return boolean success
 function M.save_project(root, data)
   return M.write_json(M.get_project_path(root), data)
@@ -139,9 +154,9 @@ end
 
 --- Update dashboard history with a project root (MRU order).
 --- Moves/adds the root to the front of the history list.
---- @param dashboard table Dashboard data
+--- @param dashboard ProjectabDashboard Dashboard data
 --- @param root string Project root
---- @return table dashboard Updated dashboard
+--- @return ProjectabDashboard dashboard Updated dashboard
 function M.touch_history(dashboard, root)
   -- Remove existing entry if present
   local new_history = {}
@@ -157,9 +172,9 @@ function M.touch_history(dashboard, root)
 end
 
 --- Remove a root from dashboard history.
---- @param dashboard table Dashboard data
+--- @param dashboard ProjectabDashboard Dashboard data
 --- @param root string Project root to remove
---- @return table dashboard Updated dashboard
+--- @return ProjectabDashboard dashboard Updated dashboard
 function M.remove_from_history(dashboard, root)
   local new_history = {}
   for _, entry in ipairs(dashboard.history) do
