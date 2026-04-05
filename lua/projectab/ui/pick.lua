@@ -27,13 +27,13 @@ local function _make_tab_item(root, tab_id)
   }
 end
 
---- Build a PickAction for the 2-stage ProjecTab history picker.
+--- Build a PickAction for the 2-stage Projectab history picker.
 --- @return PickAction
 local function _make_history_pick_item()
   local session = require("projectab.session")
   local notify = require("projectab.ui.notify")
   return {
-    label = "🕒 Open project using ProjecTab...",
+    label = "🕒 Open project using Projectab...",
     root = nil,
     tab_id = nil,
     type = "hist_projectab",
@@ -53,7 +53,7 @@ local function _make_history_pick_item()
         table.insert(hist_labels, hist_label)
       end
 
-      vim.ui.select(hist_labels, { prompt = "ProjecTab: Recent projects" }, function(h_choice, h_idx)
+      vim.ui.select(hist_labels, { prompt = "Projectab: Recent projects" }, function(h_choice, h_idx)
         if h_choice and h_idx then
           session.project_restore(hist_items[h_idx].root)
         end
@@ -189,7 +189,7 @@ function M.project_pick(opts)
     table.insert(labels, item.label)
   end
 
-  vim.ui.select(labels, { prompt = "ProjecTab: Select project" }, function(choice, idx)
+  vim.ui.select(labels, { prompt = "Projectab: Select project" }, function(choice, idx)
     if not choice or not idx then
       return
     end

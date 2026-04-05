@@ -17,7 +17,7 @@ CONTENTS                                                     *projectab-contents
 ================================================================================
 1. INTRODUCTION                                          *projectab-introduction*
 
-ProjecTab.nvim enforces a **"1 project = 1 tab"** rule in Neovim.
+Projectab.nvim enforces a **"1 project = 1 tab"** rule in Neovim.
 
   - When you open a file belonging to a project, it is displayed in that
     project's dedicated tab.
@@ -63,7 +63,7 @@ With options: >lua
     ui = {
       dashboard = {
         enabled = false,  -- show a startup dashboard with recent projects
-        header = { "ProjecTab" },
+        header = { "Projectab" },
       },
     },
     debug = {
@@ -121,11 +121,11 @@ All options live under the table passed to `setup()`.
   Show a built-in startup dashboard listing recent projects when Neovim starts
   with no arguments. Default: `false`
 
-  Note: Disable this when using snacks.nvim dashboard with the ProjecTab
+  Note: Disable this when using snacks.nvim dashboard with the Projectab
   dashboard section (see |projectab-snacks-dashboard|).
 
 `ui.dashboard.header` (string[])`
-  Lines to display as the dashboard header. Default: `{ "ProjecTab" }`
+  Lines to display as the dashboard header. Default: `{ "Projectab" }`
 
                                                           *projectab-config-debug*
 `debug.file` (boolean)
@@ -153,59 +153,59 @@ All options live under the table passed to `setup()`.
 ================================================================================
 5. COMMANDS                                                  *projectab-commands*
 
-All commands are subcommands of `:ProjecTab`. Tab completion is supported.
+All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 Single-project commands (prefix `p-`):
 
-`:ProjecTab p-open {path}`                             *:ProjecTab-p-open*
+`:Projectab p-open {path}`                             *:Projectab-p-open*
   Open a project in its own tab. If the project is already open, switch to it.
   `{path}` can be a file or directory within the project.
 
-`:ProjecTab p-pick`                                    *:ProjecTab-p-pick*
+`:Projectab p-pick`                                    *:Projectab-p-pick*
   Open an interactive project picker (`vim.ui.select`).
   Shows currently open projects and history. Also exposes snacks integration
   if enabled.
 
-`:ProjecTab p-close`                                   *:ProjecTab-p-close*
+`:Projectab p-close`                                   *:Projectab-p-close*
   Save and close the current project tab.
 
-`:ProjecTab p-save`                                    *:ProjecTab-p-save*
+`:Projectab p-save`                                    *:Projectab-p-save*
   Save session state for the current project tab only.
 
-`:ProjecTab p-restore {path}`                          *:ProjecTab-p-restore*
+`:Projectab p-restore {path}`                          *:Projectab-p-restore*
   Restore a single project from its saved state.
 
 Multi-project commands (prefix `ps-`):
 
-`:ProjecTab ps-list`                                   *:ProjecTab-ps-list*
+`:Projectab ps-list`                                   *:Projectab-ps-list*
   List all registered projects and their tab IDs via `vim.notify`.
 
-`:ProjecTab ps-save`                                   *:ProjecTab-ps-save*
+`:Projectab ps-save`                                   *:Projectab-ps-save*
   Save session state for all open projects.
 
-`:ProjecTab ps-restore`                                *:ProjecTab-ps-restore*
+`:Projectab ps-restore`                                *:Projectab-ps-restore*
   Restore all projects from persistence history.
 
-`:ProjecTab ps-clear-root-cache`                       *:ProjecTab-ps-clear-root-cache*
+`:Projectab ps-clear-root-cache`                       *:Projectab-ps-clear-root-cache*
   Clear the root detection cache. Use this after `git init` or other
   structural changes to the project directory.
 
-`:ProjecTab ps-reorganize`                             *:ProjecTab-ps-reorganize*
+`:Projectab ps-reorganize`                             *:Projectab-ps-reorganize*
   Consolidate duplicate project tabs and move misplaced buffers to their
   correct project tabs.
 
-`:ProjecTab ps-close-empty-tab`                        *:ProjecTab-ps-close-empty-tab*
+`:Projectab ps-close-empty-tab`                        *:Projectab-ps-close-empty-tab*
   Close tabs that contain only unnamed/empty buffers. Preserves the last tab.
 
-`:ProjecTab ps-toggle-routing`                         *:ProjecTab-ps-toggle-routing*
+`:Projectab ps-toggle-routing`                         *:Projectab-ps-toggle-routing*
   Toggle automatic buffer routing on/off globally.
 
 Navigation commands (prefix `p-`):
 
-`:ProjecTab p-bnext`                                   *:ProjecTab-p-bnext*
+`:Projectab p-bnext`                                   *:Projectab-p-bnext*
   Navigate to the next listed buffer belonging to the current project.
 
-`:ProjecTab p-bprev`                                   *:ProjecTab-p-bprev*
+`:Projectab p-bprev`                                   *:Projectab-p-bprev*
   Navigate to the previous listed buffer belonging to the current project.
 
 ================================================================================
@@ -304,7 +304,7 @@ Module structure: >
   ├── init.lua              Public API entry point
   ├── init/
   │   ├── autocmd.lua       Autocmd registrations
-  │   ├── command.lua       :ProjecTab user command
+  │   ├── command.lua       :Projectab user command
   │   └── keymap.lua        <Plug> and default keymaps
   ├── state.lua             Bidirectional project↔tab mapping
   ├── buffer.lua            Buffer routing + clean_misplaced_buffers()

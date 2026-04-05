@@ -1,6 +1,6 @@
-# ProjecTab.nvim
+# Projectab.nvim
 
-[![CI](https://github.com/aki-s/ProjecTab.nvim/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/aki-s/ProjecTab.nvim/actions/workflows/ci.yaml)
+[![CI](https://github.com/aki-s/Projectab.nvim/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/aki-s/Projectab.nvim/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 Neovim plugin to manage projects via tabs efficiently.
@@ -28,7 +28,7 @@ with the tab's working directory (`tcd`) set to the project root.
 
 ```lua
 {
-  "aki-s/ProjecTab.nvim",
+  "aki-s/Projectab.nvim",
   event = "VeryLazy",
   opts = {
     -- Optional: override default project root markers
@@ -56,7 +56,7 @@ with the tab's working directory (`tcd`) set to the project root.
 
 ```lua
 {
-  "aki-s/ProjecTab.nvim",
+  "aki-s/Projectab.nvim",
   event = "VeryLazy",
   opts = {},
 }
@@ -77,31 +77,31 @@ All integrations are opt-in and gracefully disabled when the plugin is not insta
 
 ### Commands
 
-All commands are subcommands of `:ProjecTab`. Tab completion is supported.
+All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 **Single-project (`p-` prefix):**
 
 | Command | Description |
 |---------|-------------|
-| `:ProjecTab p-open <path>` | Open a project in its own tab (or switch to it) |
-| `:ProjecTab p-pick` | Interactive project picker |
-| `:ProjecTab p-close` | Save and close the current project tab |
-| `:ProjecTab p-save` | Save the current project session |
-| `:ProjecTab p-restore <path>` | Restore a single project from its saved state |
-| `:ProjecTab p-bnext` | Next buffer in the current project |
-| `:ProjecTab p-bprev` | Previous buffer in the current project |
+| `:Projectab p-open <path>` | Open a project in its own tab (or switch to it) |
+| `:Projectab p-pick` | Interactive project picker |
+| `:Projectab p-close` | Save and close the current project tab |
+| `:Projectab p-save` | Save the current project session |
+| `:Projectab p-restore <path>` | Restore a single project from its saved state |
+| `:Projectab p-bnext` | Next buffer in the current project |
+| `:Projectab p-bprev` | Previous buffer in the current project |
 
 **Multi-project (`ps-` prefix):**
 
 | Command | Description |
 |---------|-------------|
-| `:ProjecTab ps-list` | List all registered projects and their tab IDs |
-| `:ProjecTab ps-save` | Save all project sessions |
-| `:ProjecTab ps-restore` | Restore all project sessions |
-| `:ProjecTab ps-clear-root-cache` | Clear the root detection cache |
-| `:ProjecTab ps-reorganize` | Consolidate duplicate tabs, move misplaced buffers |
-| `:ProjecTab ps-close-empty-tab` | Close tabs with only unnamed/empty buffers |
-| `:ProjecTab ps-toggle-routing` | Toggle automatic buffer routing on/off |
+| `:Projectab ps-list` | List all registered projects and their tab IDs |
+| `:Projectab ps-save` | Save all project sessions |
+| `:Projectab ps-restore` | Restore all project sessions |
+| `:Projectab ps-clear-root-cache` | Clear the root detection cache |
+| `:Projectab ps-reorganize` | Consolidate duplicate tabs, move misplaced buffers |
+| `:Projectab ps-close-empty-tab` | Close tabs with only unnamed/empty buffers |
+| `:Projectab ps-toggle-routing` | Toggle automatic buffer routing on/off |
 | `:checkhealth projectab` | Verify installation and integration status |
 
 ### Default Keymaps
@@ -149,20 +149,20 @@ projectab._get_state()
 
 ## snacks.nvim Integration
 
-ProjecTab integrates with [folke/snacks.nvim](https://github.com/folke/snacks.nvim)
+Projectab integrates with [folke/snacks.nvim](https://github.com/folke/snacks.nvim)
 for two features: a **project picker** and a **dashboard section**.
 
 ### Project Picker
 
 Enable `integrations.snacks.enabled = true` to add a snacks-powered option to
-the `:ProjecTab p-pick` menu. It opens
+the `:Projectab p-pick` menu. It opens
 [`snacks.picker.projects`](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md#projects),
 selects a project, calls `project_open()`, and then launches `snacks.picker.files()`
 in the new project tab.
 
 ```lua
 {
-  "aki-s/ProjecTab.nvim",
+  "aki-s/Projectab.nvim",
   dependencies = { { "folke/snacks.nvim", optional = true } },
   opts = {
     integrations = {
@@ -189,14 +189,14 @@ in the new project tab.
 `require("projectab.integrations.snacks").dashboard_section(opts)` returns a
 generator function compatible with the
 [snacks.nvim dashboard](https://github.com/folke/snacks.nvim/blob/main/docs/dashboard.md)
-`sections` list. It renders ProjecTab's MRU project history as selectable items;
+`sections` list. It renders Projectab's MRU project history as selectable items;
 selecting one calls `session.project_restore()`.
 
 ```lua
 -- Inside your snacks.nvim opts:
 {
   "folke/snacks.nvim",
-  dependencies = { { "aki-s/ProjecTab.nvim", optional = true } },
+  dependencies = { { "aki-s/Projectab.nvim", optional = true } },
   opts = {
     dashboard = {
       sections = {
@@ -206,15 +206,15 @@ selecting one calls `session.project_restore()`.
           height  = 10,
           indent  = 2,
           padding = 1,
-          title   = "ProjecTab",
-          -- Generator: returns snacks.dashboard.Item[] from ProjecTab MRU history
+          title   = "Projectab",
+          -- Generator: returns snacks.dashboard.Item[] from Projectab MRU history
           require("projectab.integrations.snacks").dashboard_section({ limit = 10 }),
         },
         -- Optional: keyed action to restore all recent projects
         {
           pane   = 1,
           key    = "R",
-          title  = "ProjecTab: restore all projects",
+          title  = "Projectab: restore all projects",
           action = function()
             require("projectab.session").projects_restore({ limit = 3 })
           end,
@@ -232,7 +232,7 @@ selecting one calls `session.project_restore()`.
 | `limit`  | `number`           | `5`     | Maximum number of projects to show                |
 | `action` | `fun(dir: string)` | `nil`   | Override item action (default: `project_restore`) |
 
-> **Note:** Disable `ui.dashboard.enabled` in ProjecTab when using the
+> **Note:** Disable `ui.dashboard.enabled` in Projectab when using the
 > snacks.nvim dashboard, otherwise both dashboards may open on startup.
 
 ## Health Check

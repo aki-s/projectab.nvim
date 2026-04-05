@@ -1,4 +1,4 @@
-# ProjecTab — Project Tab Management for Neovim
+# Projectab — Project Tab Management for Neovim
 
 ## Overview
 
@@ -27,7 +27,7 @@ require("projectab").setup({
     dashboard = {
       -- Built-in startup dashboard. Disable when using snacks.nvim dashboard.
       enabled = false,
-      header = { "ProjecTab" },
+      header = { "Projectab" },
     },
   },
 
@@ -77,31 +77,31 @@ require("projectab").setup({
 
 ## User Commands
 
-All commands are subcommands of `:ProjecTab`. Tab completion is supported.
+All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 ### Single-project commands (`p-` prefix)
 
 | Command                        | Description                                          |
 |--------------------------------|------------------------------------------------------|
-| `:ProjecTab p-open <path>`     | Open a project in its own tab (or switch to it)      |
-| `:ProjecTab p-pick`            | Interactive project picker (`vim.ui.select`)         |
-| `:ProjecTab p-close`           | Save and close the current project tab               |
-| `:ProjecTab p-save`            | Save session state for the current project tab       |
-| `:ProjecTab p-restore <path>`  | Restore a single project from its saved state        |
-| `:ProjecTab p-bnext`           | Next listed buffer in the current project            |
-| `:ProjecTab p-bprev`           | Previous listed buffer in the current project        |
+| `:Projectab p-open <path>`     | Open a project in its own tab (or switch to it)      |
+| `:Projectab p-pick`            | Interactive project picker (`vim.ui.select`)         |
+| `:Projectab p-close`           | Save and close the current project tab               |
+| `:Projectab p-save`            | Save session state for the current project tab       |
+| `:Projectab p-restore <path>`  | Restore a single project from its saved state        |
+| `:Projectab p-bnext`           | Next listed buffer in the current project            |
+| `:Projectab p-bprev`           | Previous listed buffer in the current project        |
 
 ### Multi-project commands (`ps-` prefix)
 
 | Command                          | Description                                          |
 |----------------------------------|------------------------------------------------------|
-| `:ProjecTab ps-list`             | List all registered projects and their tab IDs       |
-| `:ProjecTab ps-save`             | Save session state for all open projects             |
-| `:ProjecTab ps-restore`          | Restore all projects from persistence history        |
-| `:ProjecTab ps-clear-root-cache` | Clear the root detection cache                       |
-| `:ProjecTab ps-reorganize`       | Consolidate duplicate tabs, move misplaced buffers   |
-| `:ProjecTab ps-close-empty-tab`  | Close tabs with only unnamed/empty buffers           |
-| `:ProjecTab ps-toggle-routing`   | Toggle automatic buffer routing on/off               |
+| `:Projectab ps-list`             | List all registered projects and their tab IDs       |
+| `:Projectab ps-save`             | Save session state for all open projects             |
+| `:Projectab ps-restore`          | Restore all projects from persistence history        |
+| `:Projectab ps-clear-root-cache` | Clear the root detection cache                       |
+| `:Projectab ps-reorganize`       | Consolidate duplicate tabs, move misplaced buffers   |
+| `:Projectab ps-close-empty-tab`  | Close tabs with only unnamed/empty buffers           |
+| `:Projectab ps-toggle-routing`   | Toggle automatic buffer routing on/off               |
 
 ## Keymaps
 
@@ -179,12 +179,12 @@ require("projectab")._get_state()
 
 ## snacks.nvim Integration
 
-ProjecTab provides two integration points with [folke/snacks.nvim](https://github.com/folke/snacks.nvim):
+Projectab provides two integration points with [folke/snacks.nvim](https://github.com/folke/snacks.nvim):
 a **project picker** (`snacks.picker.projects`) and a **dashboard section**.
 
 ### Project Picker (`snacks.picker.projects`)
 
-When `integrations.snacks.enabled = true`, the `:ProjecTab p-pick` command
+When `integrations.snacks.enabled = true`, the `:Projectab p-pick` command
 and `<Plug>(projectab-pick)` keymap offer a "🍿 Open project using Snacks..."
 option that delegates to `snacks.picker.projects`.
 
@@ -200,7 +200,7 @@ for all available fields (`recent`, `max_depth`, `dev`, etc.).
 ```lua
 -- lazy.nvim example
 {
-  "aki-s/ProjecTab.nvim",
+  "aki-s/Projectab.nvim",
   dependencies = { { "folke/snacks.nvim", optional = true } },
   opts = {
     integrations = {
@@ -226,7 +226,7 @@ for all available fields (`recent`, `max_depth`, `dev`, etc.).
 
 `require("projectab.integrations.snacks").dashboard_section(opts)` returns a
 generator function compatible with the snacks.nvim dashboard `sections` list.
-It reads ProjecTab's MRU history and renders each project as a selectable item.
+It reads Projectab's MRU history and renders each project as a selectable item.
 Selecting an item calls `session.project_restore()`.
 
 See the [snacks dashboard docs](https://github.com/folke/snacks.nvim/blob/main/docs/dashboard.md)
@@ -239,7 +239,7 @@ for the full section schema.
   height  = 10,
   indent  = 2,
   padding = 1,
-  title   = "ProjecTab",
+  title   = "Projectab",
   -- Returns a list of snacks.dashboard.Item entries (one per project in MRU)
   require("projectab.integrations.snacks").dashboard_section({ limit = 10 }),
 },
@@ -247,7 +247,7 @@ for the full section schema.
 {
   pane   = 1,
   key    = "R",
-  title  = "ProjecTab: restore all projects",
+  title  = "Projectab: restore all projects",
   action = function()
     require("projectab.session").projects_restore({ limit = 3 })
   end,
@@ -355,7 +355,7 @@ graph TD
 |--------|---------------|
 | **`init.lua`** | Public entry point. Exports `setup()`, `suspend()`, `resume()`, `_get_state()`. Delegates setup to `init/` sub-modules. |
 | **`init/autocmd.lua`** | Registers autocmds: `BufEnter` (routing), `BufWinEnter` (winbar), `SessionLoadPost` (cleanup), `TabEnter` (bufferline), `VimEnter once` (startup scan + dashboard), `TabClosed` (state cleanup), `VimLeavePre` (save). |
-| **`init/command.lua`** | Registers `:ProjecTab` user command with all subcommands and tab-completion. |
+| **`init/command.lua`** | Registers `:Projectab` user command with all subcommands and tab-completion. |
 | **`init/keymap.lua`** | Registers `<Plug>` mappings and default fallback keymaps. |
 | **`state.lua`** | Bidirectional mapping (`project_to_tab` ↔ `tab_to_project`). `register()` is the **single entry point** for state mutation + tcd setting. `scan_existing_tabs()` reads tcd (priority 1) then detects from buffers (priority 2). |
 | **`buffer.lua`** | Buffer routing on `BufEnter`. Guards: `is_suspended`, `vim.g.SessionLoad`, `is_routing` (reentrancy), `buftype`. Resolves project root, allocates buffer to correct tab. `clean_misplaced_buffers()` uses 2-pass: collect then execute. |
@@ -373,7 +373,7 @@ graph TD
 | **`ui/pick.lua`** | `vim.ui.select` project picker with history and optional snacks integration. |
 | **`integrations/project_nvim.lua`** | Optional: Uses `project.nvim` API for root detection. |
 | **`integrations/bufferline.lua`** | Optional: Dynamically groups buffers by project in bufferline on TabEnter. Uses lazy require for `buffer.lua` to avoid circular dependency. |
-| **`integrations/snacks.lua`** | Optional: `pick_new_project()` wraps `snacks.picker.projects`; `dashboard_section()` returns a snacks dashboard item generator reading ProjecTab MRU history. |
+| **`integrations/snacks.lua`** | Optional: `pick_new_project()` wraps `snacks.picker.projects`; `dashboard_section()` returns a snacks dashboard item generator reading Projectab MRU history. |
 
 ### State Lifecycle
 
@@ -436,4 +436,4 @@ false → cached negative (no root exists here)
 "..."  → cached positive root path
 ```
 
-Clear manually with `:ProjecTab ps-clear-root-cache` or `require("projectab.detect").clear_cache()`.
+Clear manually with `:Projectab ps-clear-root-cache` or `require("projectab.detect").clear_cache()`.

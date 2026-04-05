@@ -50,7 +50,7 @@ describe("projectab.ui.pick", function()
   it("calling pick_project opens a vim.ui.select dialog", function()
     pick.project_pick()
     assert.are.equal(1, #select_calls)
-    assert.are.equal("ProjecTab: Select project", select_calls[1].opts.prompt)
+    assert.are.equal("Projectab: Select project", select_calls[1].opts.prompt)
   end)
 
   it("includes known projects in the list", function()
@@ -66,7 +66,7 @@ describe("projectab.ui.pick", function()
     pick.project_pick()
 
     local items = select_calls[1].items
-    -- At minimum: 2 projects + "Open project using ProjecTab..." + "📂 Open directory..."
+    -- At minimum: 2 projects + "Open project using Projectab..." + "📂 Open directory..."
     assert.is_true(#items >= 4, "Expected at least 4 items, got " .. #items)
 
     -- Check that project labels are present
@@ -184,7 +184,7 @@ describe("projectab.ui.pick", function()
     local items = select_calls[1].items
 
     -- With no projects and default config (snacks disabled), expect:
-    -- 1. "🕒 Open project using ProjecTab..."
+    -- 1. "🕒 Open project using Projectab..."
     -- 2. "📂 Open directory..."
     -- (plus any history entries from persistence, which may be 0)
     assert.is_true(#items >= 2, "Expected at least 2 items, got " .. #items)
@@ -192,7 +192,7 @@ describe("projectab.ui.pick", function()
     local has_history_picker = false
     local has_dir = false
     for _, label in ipairs(items) do
-      if label:find("Open project using ProjecTab") then
+      if label:find("Open project using Projectab") then
         has_history_picker = true
       end
       if label:find("Open directory") then

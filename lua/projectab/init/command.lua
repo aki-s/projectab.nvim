@@ -23,7 +23,7 @@ function M.setup()
   local notify = require("projectab.ui.notify")
 
   -- User commands
-  vim.api.nvim_create_user_command("ProjecTab", function(cmd_opts)
+  vim.api.nvim_create_user_command("Projectab", function(cmd_opts)
     local subcmd = cmd_opts.fargs[1]
     if subcmd == CMD_PROJECTS_CLEAR_ROOT_CACHE then
       require("projectab.detect").projects_clear_root_cache()
@@ -68,7 +68,7 @@ function M.setup()
       if path then
         require("projectab.session").project_open(path)
       else
-        notify(string.format("Usage: :ProjecTab %s <path>", CMD_PROJECT_OPEN), vim.log.levels.WARN)
+        notify(string.format("Usage: :Projectab %s <path>", CMD_PROJECT_OPEN), vim.log.levels.WARN)
       end
     elseif subcmd == CMD_PROJECT_PICK then
       require("projectab.ui.pick").project_pick()
@@ -78,7 +78,7 @@ function M.setup()
         local session = require("projectab.session")
         session.project_restore(vim.fn.expand(path))
       else
-        notify(string.format("Usage: :ProjecTab %s <path>", CMD_PROJECT_RESTORE), vim.log.levels.WARN)
+        notify(string.format("Usage: :Projectab %s <path>", CMD_PROJECT_RESTORE), vim.log.levels.WARN)
       end
     elseif subcmd == CMD_PROJECT_SAVE then
       local tab_id = vim.api.nvim_get_current_tabpage()

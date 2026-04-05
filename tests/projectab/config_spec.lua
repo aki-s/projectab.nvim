@@ -19,7 +19,7 @@ describe("projectab config.lua", function()
 
     -- UI
     assert.is_false(c.ui.dashboard.enabled)
-    assert.are.same({ "ProjecTab" }, c.ui.dashboard.header)
+    assert.are.same({ "Projectab" }, c.ui.dashboard.header)
 
     -- Project
     assert.is_true(#c.project.root_markers > 0)
@@ -100,7 +100,7 @@ describe("projectab config.lua", function()
     })
 
     assert.is_true(config.values.ui.dashboard.enabled)
-    assert.are.same({ "ProjecTab" }, config.values.ui.dashboard.header, "Should retain default header")
+    assert.are.same({ "Projectab" }, config.values.ui.dashboard.header, "Should retain default header")
     assert.is_true(config.values.project.persistence.enabled, "Should retain default persistence")
   end)
 
@@ -114,9 +114,9 @@ describe("projectab config.lua", function()
 
   it("handles nil/empty setup by keeping defaults", function()
     config.setup(nil)
-    assert.are.same({ "ProjecTab" }, config.values.ui.dashboard.header)
+    assert.are.same({ "Projectab" }, config.values.ui.dashboard.header)
 
     config.setup({})
-    assert.are.same({ "ProjecTab" }, config.values.ui.dashboard.header)
+    assert.are.same({ "Projectab" }, config.values.ui.dashboard.header)
   end)
 end)

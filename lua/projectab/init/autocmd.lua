@@ -22,7 +22,7 @@ function M.setup()
   local state = require("projectab.state")
   local buffer = require("projectab.buffer")
 
-  local augroup = vim.api.nvim_create_augroup("ProjecTab", { clear = true })
+  local augroup = vim.api.nvim_create_augroup("Projectab", { clear = true })
 
   -- ======================================================================
   -- Read: BufReadPre -> BufReadPost -> BufWinEnter -> BufEnter
@@ -91,7 +91,7 @@ function M.setup()
 
       local tab_id = vim.api.nvim_get_current_tabpage()
 
-      -- Default mode "require("bufferline.config").options.mode" 'buffer' does not work well with ProjecTab.
+      -- Default mode "require("bufferline.config").options.mode" 'buffer' does not work well with Projectab.
       if config.values.integrations.bufferline.enabled and require("bufferline.config").options.mode == "tabs" then
         local ok, bl = pcall(require, "projectab.integrations.bufferline")
         ---@cast bl ProjectabBufferlineIntegration

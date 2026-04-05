@@ -49,7 +49,7 @@ local defaults = {
   ui = {
     dashboard = {
       enabled = false,
-      header = { "ProjecTab" },
+      header = { "Projectab" },
     },
   },
   project = {
