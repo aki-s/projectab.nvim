@@ -159,4 +159,47 @@ describe("projectab.ui.pick", function()
     vim.api.nvim_set_current_tabpage = orig_set
     assert.are.equal(tab1, switched_to)
   end)
+
+  it("selecting 'Open directory...' invokes directory_picker_func via action()", function()
+    local picker_called = false
+    config.values.project.directory_picker_func = function(_opts, _cb)
+      picker_called = true
+    end
+
+    vim.ui.select = function(items, _opts, on_choice)
+      for i, label in ipairs(items) do
+        if label:find("Open directory") then
+          on_choice(label, i)
+          return
+        end
+      end
+    end
+
+    pick.project_pick()
+    assert.is_true(picker_called, "Expected directory_picker_func to be invoked for 'dir' action")
+  end)
+
+  it("all items have expected label patterns for default config", function()
+    pick.project_pick()
+    local items = select_calls[1].items
+
+    -- With no projects and default config (snacks disabled), expect:
+    -- 1. "🕒 Open project using ProjecTab..."
+    -- 2. "📂 Open directory..."
+    -- (plus any history entries from persistence, which may be 0)
+    assert.is_true(#items >= 2, "Expected at least 2 items, got " .. #items)
+
+    local has_history_picker = false
+    local has_dir = false
+    for _, label in ipairs(items) do
+      if label:find("Open project using ProjecTab") then
+        has_history_picker = true
+      end
+      if label:find("Open directory") then
+        has_dir = true
+      end
+    end
+    assert.is_true(has_history_picker, "Expected history picker item")
+    assert.is_true(has_dir, "Expected directory item")
+  end)
 end)
