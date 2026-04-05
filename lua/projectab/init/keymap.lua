@@ -49,14 +49,6 @@ function M.setup()
 
   vim.keymap.set(
     "n",
-    "<Plug>(projectab-restore-project)",
-    "<Cmd>ProjecTab p-restore<CR>",
-    { desc = "ProjecTab: Restore a project" }
-  )
-  safe_map("n", "<leader><TAB>r", "<Plug>(projectab-restore-project)", { desc = "ProjecTab: Restore a project" })
-
-  vim.keymap.set(
-    "n",
     "<Plug>(projectab-save-project)",
     "<Cmd>ProjecTab p-save<CR>",
     { desc = "ProjecTab: Save current project" }
