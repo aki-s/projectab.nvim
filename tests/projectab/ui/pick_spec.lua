@@ -202,4 +202,33 @@ describe("projectab.ui.pick", function()
     assert.is_true(has_history_picker, "Expected history picker item")
     assert.is_true(has_dir, "Expected directory item")
   end)
+
+  it("includes extra items from opts.actions", function()
+    local custom_action_called = false
+    local opts = {
+      actions = {
+        function()
+          return {
+            label = "⭐ Custom Action",
+            action = function()
+              custom_action_called = true
+            end,
+            type = "custom",
+          }
+        end,
+      },
+    }
+
+    vim.ui.select = function(items, _opts, on_choice)
+      for i, label in ipairs(items) do
+        if label:find("Custom Action") then
+          on_choice(label, i)
+          return
+        end
+      end
+    end
+
+    pick.project_pick(opts)
+    assert.is_true(custom_action_called, "Expected custom action to be called")
+  end)
 end)

@@ -127,22 +127,16 @@ local function _make_history_entry_item(root)
   }
 end
 
---- Open a picker to select a known project or enter a new directory.
---- Uses vim.ui.select (works in TUI and GUI).
---- When "New project..." is selected, delegates to the snacks integration
---- (if enabled) or falls back to vim.ui.input.
---- History entries (up to 50) that are not already open are appended below
---- "📂 Open directory..." for single-step selection (Case B).
-function M.project_pick()
+--- Build a default PickActions
+---
+-- @return PickAction[]
+local function _defaultPickerActions()
+  local items = {}
   local config = require("projectab.config")
   local state = require("projectab.state")
   local session = require("projectab.session")
-
   local projects = state.list_projects()
 
-  -- Build sorted list of known project entries
-  --- @type PickAction[]
-  local items = {}
   for root, tab_id in pairs(projects) do
     table.insert(items, _make_tab_item(root, tab_id))
   end
@@ -158,12 +152,35 @@ function M.project_pick()
 
   table.insert(items, _make_dir_item())
 
-  -- Case B: append history entries (not already open) directly below "📂 Open directory..."
+  -- Append history entries directly below "📂 Open directory..."
   local history = session.list_history({ limit = 50 })
   for _, root in ipairs(history) do
     if not projects[root] then
       table.insert(items, _make_history_entry_item(root))
     end
+  end
+  return items
+end
+
+--- @class ProjectabPickOptions
+--- @field actions? (fun(): PickAction)[]
+
+--- Open a picker to select a project
+---
+--- @param opts? ProjectabPickOptions
+function M.project_pick(opts)
+  opts = opts or {}
+  -- Build sorted list of known project entries
+  --- @type PickAction[]
+  local items = {}
+
+  if opts.actions and #opts.actions > 0 then
+    -- Add extra items provided via opts
+    for _, action_fn in ipairs(opts.actions or {}) do
+      table.insert(items, action_fn())
+    end
+  else
+    items = _defaultPickerActions()
   end
 
   -- Build labels for vim.ui.select
