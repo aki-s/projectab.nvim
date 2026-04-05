@@ -5,9 +5,12 @@ local M = {}
 --- Uses vim.ui.select (works in TUI and GUI).
 --- When "New project..." is selected, delegates to the snacks integration
 --- (if enabled) or falls back to vim.ui.input.
+--- History entries (up to 50) that are not already open are appended below
+--- "📂 Open directory..." for single-step selection (Case B).
 function M.project_pick()
   local config = require("projectab.config")
   local state = require("projectab.state")
+  local session = require("projectab.session")
   local log = require("projectab.log")
   local notify = require("projectab.ui.notify")
 
@@ -45,6 +48,19 @@ function M.project_pick()
     is_new = true,
   })
 
+  -- Case B: append history entries (not already open) directly below "📂 Open directory..."
+  local history = session.list_history({ limit = 50 })
+  for _, root in ipairs(history) do
+    if not projects[root] then
+      local name = vim.fn.fnamemodify(root, ":t")
+      table.insert(items, {
+        label = string.format("🕒 %s  (%s)", name, root),
+        root = root,
+        is_history_entry = true,
+      })
+    end
+  end
+
   -- Build labels for vim.ui.select
   local labels = {}
   for _, item in ipairs(items) do
@@ -55,7 +71,6 @@ function M.project_pick()
     if not choice or not idx then
       return
     end
-    local session = require("projectab.session")
 
     local selected = items[idx]
     if selected.is_new then
@@ -69,15 +84,16 @@ function M.project_pick()
         end
       )
     elseif selected.is_history then
-      local history = require("projectab.session").list_history({ limit = 50 })
-      if not history or #history == 0 then
+      -- Case A: 2-stage picker
+      local hist = session.list_history({ limit = 50 })
+      if not hist or #hist == 0 then
         notify("No project history found", vim.log.levels.INFO)
         return
       end
 
       local hist_items = {}
       local hist_labels = {}
-      for _, root in ipairs(history) do
+      for _, root in ipairs(hist) do
         local name = vim.fn.fnamemodify(root, ":t")
         local hist_label = string.format("%s  (%s)", name, root)
         table.insert(hist_items, { label = hist_label, root = root })
@@ -89,6 +105,10 @@ function M.project_pick()
           session.project_restore(hist_items[h_idx].root)
         end
       end)
+    elseif selected.is_history_entry then
+      -- Case B: direct history entry selected
+      log.debug_ctx(string.format("pick_project: restore history entry root=%s", selected.root))
+      session.project_restore(selected.root)
     elseif selected.is_snacks then
       local ok, snacks_int = pcall(require, "projectab.integrations.snacks")
       ---@cast snacks_int ProjectabSnacksIntegration
