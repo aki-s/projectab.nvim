@@ -226,7 +226,7 @@ for all available fields (`recent`, `max_depth`, `dev`, etc.).
 
 `require("projectab.integrations.snacks").dashboard_section(opts)` returns a
 generator function compatible with the snacks.nvim dashboard `sections` list.
-It reads Projectab's MRU history and renders each project as a selectable item.
+It reads Projectab's history and renders each project as a selectable item.
 Selecting an item calls `session.project_restore()`.
 
 See the [snacks dashboard docs](https://github.com/folke/snacks.nvim/blob/main/docs/dashboard.md)
@@ -363,7 +363,7 @@ graph TD
 | **`config.lua`** | Default options and user config merge. Structured as `project.*`, `ui.*`, `debug`, `integrations.*`. |
 | **`log.lua`** | Debug logging. Early-returns when disabled (no string allocation on hot path). |
 | **`session.lua`** | Save/restore project state (buffer list, active buffer) per project. `project_open()` creates or switches to a project tab. `projects_save()` / `projects_restore()` for bulk operations. |
-| **`persistence.lua`** | JSON file I/O and path encoding for project state storage. Dashboard MRU history. |
+| **`persistence.lua`** | JSON file I/O and path encoding for project state storage. Dashboard history. |
 | **`cleanup.lua`** | `projects_close_empty_tab()` and `projects_reorganize()` (consolidate duplicate tabs + move misplaced buffers). |
 | **`navigate.lua`** | Project-scoped buffer navigation: `project_bnext()` / `project_bprevious()` constrained to the current project. |
 | **`health.lua`** | `:checkhealth projectab` — verifies Neovim version, config, integrations, persistence. |
@@ -373,7 +373,7 @@ graph TD
 | **`ui/pick.lua`** | `vim.ui.select` project picker with history and optional snacks integration. |
 | **`integrations/project_nvim.lua`** | Optional: Uses `project.nvim` API for root detection. |
 | **`integrations/bufferline.lua`** | Optional: Dynamically groups buffers by project in bufferline on TabEnter. Uses lazy require for `buffer.lua` to avoid circular dependency. |
-| **`integrations/snacks.lua`** | Optional: `pick_new_project()` wraps `snacks.picker.projects`; `dashboard_section()` returns a snacks dashboard item generator reading Projectab MRU history. |
+| **`integrations/snacks.lua`** | Optional: `pick_new_project()` wraps `snacks.picker.projects`; `dashboard_section()` returns a snacks dashboard item generator reading Projectab history. |
 
 ### State Lifecycle
 

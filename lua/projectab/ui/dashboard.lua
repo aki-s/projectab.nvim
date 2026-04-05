@@ -14,7 +14,7 @@ function M.open()
   vim.bo[buf].swapfile = false
   vim.bo[buf].filetype = "projectab_dashboard"
 
-  -- Collect projects (MRU order from history)
+  -- Collect projects
   local session = require("projectab.session")
   local history = session.list_history()
   local items = {}

@@ -4,7 +4,7 @@
 --- Save flow:
 ---   1. For each registered project→tab, collect absolute buffer paths and active buffer.
 ---   2. Write per-project JSON via persistence module.
----   3. Update dashboard.json MRU history.
+---   3. Update dashboard.json.
 ---
 --- Restore flow:
 ---   1. Read per-project JSON.

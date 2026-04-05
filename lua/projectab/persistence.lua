@@ -2,7 +2,7 @@
 --- Handles JSON file I/O and path encoding for project state storage.
 ---
 --- Storage layout (under stdpath("data") .. "/projectab/"):
----   dashboard.json               — MRU history of project roots
+---   dashboard.json               — history of project roots
 ---   %Users%user1%app.json        — per-project state (buffers, active_buffer)
 ---
 --- Path encoding: "/" → "%" so that project roots become flat filenames.
@@ -10,7 +10,7 @@
 local M = {}
 
 --- @class ProjectabDashboard
---- @field history string[] List of project roots in MRU order
+--- @field history string[] List of project root directories
 --- @field version number Schema version
 
 --- @class ProjectabProjectState
@@ -152,21 +152,19 @@ function M.delete_project(root)
   log.debug_ctx("persistence: deleted project file: " .. path)
 end
 
---- Update dashboard history with a project root (MRU order).
+--- Update dashboard history with a project root.
 --- Moves/adds the root to the front of the history list.
 --- @param dashboard ProjectabDashboard Dashboard data
 --- @param root string Project root
 --- @return ProjectabDashboard dashboard Updated dashboard
 function M.touch_history(dashboard, root)
-  -- Remove existing entry if present
   local new_history = {}
+  table.insert(new_history, root)
   for _, entry in ipairs(dashboard.history) do
     if entry ~= root then
       table.insert(new_history, entry)
     end
   end
-  -- Insert at front (most recent)
-  table.insert(new_history, 1, root)
   dashboard.history = new_history
   return dashboard
 end

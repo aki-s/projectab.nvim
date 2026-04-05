@@ -189,7 +189,7 @@ in the new project tab.
 `require("projectab.integrations.snacks").dashboard_section(opts)` returns a
 generator function compatible with the
 [snacks.nvim dashboard](https://github.com/folke/snacks.nvim/blob/main/docs/dashboard.md)
-`sections` list. It renders Projectab's MRU project history as selectable items;
+`sections` list. It renders Projectab's project history as selectable items;
 selecting one calls `session.project_restore()`.
 
 ```lua
@@ -207,7 +207,7 @@ selecting one calls `session.project_restore()`.
           indent  = 2,
           padding = 1,
           title   = "Projectab",
-          -- Generator: returns snacks.dashboard.Item[] from Projectab MRU history
+          -- Generator: returns snacks.dashboard.Item[] from Projectab history
           require("projectab.integrations.snacks").dashboard_section({ limit = 10 }),
         },
         -- Optional: keyed action to restore all recent projects
