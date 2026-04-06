@@ -114,7 +114,7 @@ function M.get_root(filepath)
   -- This avoids repeated VimL calls for the same exclude patterns.
   local expanded_excludes = {}
   for _, exclude in ipairs(opts.project.excluded_root_dirs) do
-    table.insert(expanded_excludes, vim.fn.expand(exclude))
+    table.insert(expanded_excludes, vim.fs.normalize(vim.fn.expand(exclude)))
   end
 
   -- Walk upward from the file's directory

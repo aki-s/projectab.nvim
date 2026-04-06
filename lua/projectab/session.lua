@@ -93,7 +93,7 @@ function M.project_open(path, opts)
   local buffer = require("projectab.buffer")
 
   -- Normalize: expand ~, resolve symlinks (e.g., macOS /tmp → /private/tmp)
-  local target_path = vim.fn.expand(path)
+  local target_path = vim.fs.normalize(vim.fn.expand(path))
   target_path = vim.uv.fs_realpath(target_path) or target_path
 
   -- Resolve project root from the given path (works for both files and directories)
