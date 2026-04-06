@@ -65,7 +65,7 @@ function M.check()
   start("projectab.nvim Persistence")
   if config.project.persistence.enabled then
     local persistence = require("projectab.persistence")
-    local data_dir = persistence.get_data_dir()
+    local data_dir = persistence.get_data_root_dir()
     if vim.fn.isdirectory(data_dir) == 1 then
       ok(string.format("Persistence directory exists: `%s`", data_dir))
       local file = io.open(data_dir .. "/.health_check", "w")

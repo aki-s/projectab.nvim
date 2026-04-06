@@ -44,7 +44,7 @@ end
 
 --- Return the persistence data directory, creating it if necessary.
 --- @return string dir Absolute path to the data directory
-function M.get_data_dir()
+function M.get_data_root_dir()
   local dir = config.values.project.persistence.dir
   if not dir then
     dir = vim.fn.stdpath("data") .. "/projectab"
@@ -56,14 +56,20 @@ end
 --- Return the path to persistence.json.
 --- @return string
 function M.get_persistence_path()
-  return M.get_data_dir() .. "/persistence.json"
+  return M.get_data_root_dir() .. "/persistence.json"
+end
+
+--- Return the root path containing each project data.
+--- @return string
+function M.get_project_data_root_dir()
+  return M.get_data_root_dir() .. "/projects"
 end
 
 --- Return the path to a per-project JSON file.
 --- @param root string Project root (absolute path)
 --- @return string
 function M.get_project_path(root)
-  return M.get_data_dir() .. "/projects/" .. M.encode_path(root) .. ".json"
+  return M.get_project_data_root_dir() .. "/" .. M.encode_path(root) .. ".json"
 end
 
 --- Read and decode a JSON file.
@@ -159,7 +165,7 @@ end
 --- @return string[] Unencoded absolute paths of recent projects
 function M.list_projects_by_recency(limit)
   limit = limit or 50
-  local projects_dir = M.get_data_dir() .. "/projects"
+  local projects_dir = M.get_project_data_root_dir()
   local stat = vim.uv.fs_stat(projects_dir)
   if not stat or stat.type ~= "directory" then
     return {}
