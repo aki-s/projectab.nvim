@@ -28,7 +28,7 @@ with the tab's working directory (`tcd`) set to the project root.
 
 ```lua
 {
-  "aki-s/Projectab.nvim",
+  "aki-s/projectab.nvim",
   event = "VeryLazy",
   opts = {
     -- Optional: override default project root markers
@@ -56,7 +56,7 @@ with the tab's working directory (`tcd`) set to the project root.
 
 ```lua
 {
-  "aki-s/Projectab.nvim",
+  "aki-s/projectab.nvim",
   event = "VeryLazy",
   opts = {},
 }
@@ -162,7 +162,7 @@ in the new project tab.
 
 ```lua
 {
-  "aki-s/Projectab.nvim",
+  "aki-s/projectab.nvim",
   dependencies = { { "folke/snacks.nvim", optional = true } },
   opts = {
     integrations = {
@@ -196,7 +196,7 @@ selecting one calls `session.project_restore()`.
 -- Inside your snacks.nvim opts:
 {
   "folke/snacks.nvim",
-  dependencies = { { "aki-s/Projectab.nvim", optional = true } },
+  dependencies = { { "aki-s/projectab.nvim", optional = true } },
   opts = {
     dashboard = {
       sections = {
