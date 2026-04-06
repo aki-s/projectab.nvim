@@ -26,16 +26,6 @@ local log = require("projectab.log")
 --- @type table<string, string|false>
 local root_cache = {}
 
---- Normalize a path by removing trailing slashes.
---- @param path string
---- @return string
-local function normalize(path)
-  if path == "/" then
-    return path
-  end
-  return (path:gsub("/$", ""))
-end
-
 --- Get the parent directory of a path.
 --- @param path string
 --- @return string|nil Parent path, or nil if already at root
@@ -106,7 +96,7 @@ function M.get_root(filepath)
   else
     dir = vim.fn.fnamemodify(filepath, ":p:h")
   end
-  dir = normalize(dir)
+  dir = vim.fs.normalize(dir)
 
   -- Cache lookup: all files in the same directory share the same root.
   local cached = root_cache[dir]

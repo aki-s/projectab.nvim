@@ -28,16 +28,6 @@ local state = {
   tab_to_project = {},
 }
 
---- Normalize a path by removing trailing slash.
---- @param path string
---- @return string
-local function normalize(path)
-  if path == "/" then
-    return path
-  end
-  return (path:gsub("/$", ""))
-end
-
 --- Register a project-to-tab mapping (bidirectional) and set tcd.
 ---
 --- This is the SINGLE entry point for associating a project with a tab.
@@ -134,7 +124,7 @@ function M.consolidate_duplicate_tabs()
       if not dup_root then
         local tab_nr = vim.api.nvim_tabpage_get_number(dup_tab)
         if vim.fn.haslocaldir(-1, tab_nr) == 1 then
-          dup_root = normalize(vim.fn.getcwd(-1, tab_nr))
+          dup_root = vim.fs.normalize(vim.fn.getcwd(-1, tab_nr))
         else
           -- Fallback to buffering detection
           local wins = vim.api.nvim_tabpage_list_wins(dup_tab)
@@ -229,7 +219,7 @@ function M.scan_existing_tabs(detect_fn)
       -- haslocaldir(-1, tabnr) returns 1 when a tab-local directory is set.
       local tab_nr = vim.api.nvim_tabpage_get_number(tab_id)
       if vim.fn.haslocaldir(-1, tab_nr) == 1 then
-        root = normalize(vim.fn.getcwd(-1, tab_nr))
+        root = vim.fs.normalize(vim.fn.getcwd(-1, tab_nr))
         log.debug_ctx(string.format("scan found tcd=%s for tab=%d", root, tab_id))
       end
 
