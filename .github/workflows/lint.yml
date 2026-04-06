@@ -8,12 +8,24 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    ## TODO: use mise, if installation failure is fixed
+    # name: Lint (stylua)
+    # runs-on: ubuntu-24.04
+    # steps:
+    #   - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    #   - name: Setup tools with mise
+    #     uses: jdx/mise-action@c37c93293d6b742fc901e1406b8f764f6fb19dac # v2.4.4
+
+    #   - name: Check formatting with stylua
+    #     run: stylua --check .
+
+    name: stylua
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup tools with mise
-        uses: jdx/mise-action@v2
-
-      - name: Check formatting with stylua
-        run: stylua --check .
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - uses: JohnnyMorganz/stylua-action@479972f01e665acfcba96ada452c36608bdbbb5e # v4.1.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          version: v2.4.0
+          args: --color always --check --allow-hidden .
