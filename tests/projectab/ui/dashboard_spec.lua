@@ -11,8 +11,8 @@ describe("projectab.ui.dashboard", function()
   end)
 
   it("open creates a nofile buffer with keymaps", function()
-    local original_list_history = session.list_history
-    session.list_history = function()
+    local original_list = session.list
+    session.list = function()
       return { "/tmp/my_fake_project" }
     end
 
@@ -40,12 +40,12 @@ describe("projectab.ui.dashboard", function()
 
     -- Clean up
     vim.api.nvim_buf_delete(buf, { force = true })
-    session.list_history = original_list_history
+    session.list = original_list
   end)
 
   it("handles empty project history gracefully", function()
-    local original_list_history = session.list_history
-    session.list_history = function()
+    local original_list = session.list
+    session.list = function()
       return {}
     end
 
@@ -62,6 +62,6 @@ describe("projectab.ui.dashboard", function()
     assert.is_true(found_empty_msg, "Should show empty projects message")
 
     vim.api.nvim_buf_delete(buf, { force = true })
-    session.list_history = original_list_history
+    session.list = original_list
   end)
 end)

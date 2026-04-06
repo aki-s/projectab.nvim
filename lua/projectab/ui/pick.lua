@@ -38,7 +38,7 @@ local function _make_history_pick_item()
     tab_id = nil,
     type = "hist_projectab",
     action = function(_self)
-      local hist = session.list_history({ limit = 50 })
+      local hist = session.list({ limit = 50 })
       if not hist or #hist == 0 then
         notify("No project history found", vim.log.levels.INFO)
         return
@@ -153,7 +153,7 @@ local function _defaultPickerActions()
   table.insert(items, _make_dir_item())
 
   -- Append history entries directly below "📂 Open directory..."
-  local history = session.list_history({ limit = 50 })
+  local history = session.list({ limit = 50 })
   for _, root in ipairs(history) do
     if not projects[root] then
       table.insert(items, _make_history_entry_item(root))

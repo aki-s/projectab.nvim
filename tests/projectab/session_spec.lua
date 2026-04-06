@@ -309,16 +309,18 @@ describe("projectab.session", function()
     assert.is_true(saved_path:sub(1, 1) == "/", "Saved path must start with /")
   end)
 
-  it("list_history returns history from persistence", function()
-    local dashboard_data = {
-      version = 1,
-      history = { "/tmp/project1", "/tmp/project2" },
-    }
-    persistence.load_dashboard = function()
-      return dashboard_data
+  it("list returns projects sorted by recency from persistence", function()
+    persistence.list_projects_by_recency = function(limit)
+      if limit == 1 then
+        return { "/tmp/project2" }
+      end
+      return { "/tmp/project2", "/tmp/project1" }
     end
 
-    local history = session.list_history()
-    assert.are.same({ "/tmp/project1", "/tmp/project2" }, history)
+    local history = session.list()
+    assert.are.same({ "/tmp/project2", "/tmp/project1" }, history)
+
+    local limited = session.list({ limit = 1 })
+    assert.are.same({ "/tmp/project2" }, limited)
   end)
 end)

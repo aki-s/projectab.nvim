@@ -50,18 +50,15 @@ function M.dashboard_section(opts)
     opts = opts or {}
     local session = require("projectab.session")
     local limit = opts.limit or 5
-    local history = session.list_history()
+    local sessions = session.list({ limit = limit })
 
     local dirs = {}
-    for _, root in ipairs(history) do
+    for _, root in ipairs(sessions) do
       table.insert(dirs, root)
     end
 
     local ret = {}
     for i, dir in ipairs(dirs) do
-      if i > limit then
-        break
-      end
       ret[#ret + 1] = {
         file = dir,
         icon = "directory",

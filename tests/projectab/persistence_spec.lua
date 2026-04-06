@@ -91,55 +91,44 @@ describe("projectab.persistence", function()
 
   -- Dashboard -------------------------------------------------------------
 
-  describe("dashboard", function()
+  describe("persistence data", function()
     it("loads default when no file exists", function()
-      local d = persistence.load_dashboard()
+      local d = persistence.load_data()
       assert.are.equal(1, d.version)
-      assert.are.same({}, d.history)
+      assert.are.same({}, d.sessions)
     end)
 
-    it("saves and loads dashboard", function()
-      local d = { version = 1, history = { "/a", "/b" } }
-      persistence.save_dashboard(d)
+    it("saves and loads data", function()
+      local d = { version = 1, sessions = { "/a", "/b" } }
+      persistence.save_data(d)
 
-      local loaded = persistence.load_dashboard()
-      assert.are.same({ "/a", "/b" }, loaded.history)
-    end)
-  end)
-
-  -- History operations ----------------------------------------------------
-
-  describe("touch_history", function()
-    it("adds a new root to the front", function()
-      local d = { version = 1, history = { "/a", "/b" } }
-      d = persistence.touch_history(d, "/c")
-      assert.are.same({ "/c", "/a", "/b" }, d.history)
-    end)
-
-    it("moves an existing root to the front", function()
-      local d = { version = 1, history = { "/a", "/b", "/c" } }
-      d = persistence.touch_history(d, "/b")
-      assert.are.same({ "/b", "/a", "/c" }, d.history)
-    end)
-
-    it("does not duplicate entries", function()
-      local d = { version = 1, history = { "/a" } }
-      d = persistence.touch_history(d, "/a")
-      assert.are.same({ "/a" }, d.history)
+      local loaded = persistence.load_data()
+      assert.are.same({ "/a", "/b" }, loaded.sessions)
     end)
   end)
 
-  describe("remove_from_history", function()
-    it("removes an existing root", function()
-      local d = { version = 1, history = { "/a", "/b", "/c" } }
-      d = persistence.remove_from_history(d, "/b")
-      assert.are.same({ "/a", "/c" }, d.history)
+  describe("list_projects_by_recency", function()
+    it("returns listed projects sorted by last_saved descending", function()
+      persistence.save_project("/a", { version = 1, root = "/a", last_saved = 100, state = { buffers = {} } })
+      persistence.save_project("/b", { version = 1, root = "/b", last_saved = 300, state = { buffers = {} } })
+      persistence.save_project("/c", { version = 1, root = "/c", last_saved = 200, state = { buffers = {} } })
+
+      local recent = persistence.list_projects_by_recency()
+      assert.are.same({ "/b", "/c", "/a" }, recent)
     end)
 
-    it("is a no-op for non-existent root", function()
-      local d = { version = 1, history = { "/a", "/b" } }
-      d = persistence.remove_from_history(d, "/z")
-      assert.are.same({ "/a", "/b" }, d.history)
+    it("respects limit", function()
+      persistence.save_project("/a", { version = 1, root = "/a", last_saved = 100, state = { buffers = {} } })
+      persistence.save_project("/b", { version = 1, root = "/b", last_saved = 300, state = { buffers = {} } })
+      persistence.save_project("/c", { version = 1, root = "/c", last_saved = 200, state = { buffers = {} } })
+
+      local recent = persistence.list_projects_by_recency(2)
+      assert.are.same({ "/b", "/c" }, recent)
+    end)
+
+    it("returns empty list if no projects", function()
+      local recent = persistence.list_projects_by_recency()
+      assert.are.same({}, recent)
     end)
   end)
 
@@ -181,7 +170,7 @@ describe("projectab.persistence", function()
 
     it("project file path uses encoded root", function()
       local root = "/Users/user1/projects/appA"
-      local expected = test_dir .. "/%Users%user1%projects%appA.json"
+      local expected = test_dir .. "/projects/%Users%user1%projects%appA.json"
       assert.are.equal(expected, persistence.get_project_path(root))
     end)
   end)

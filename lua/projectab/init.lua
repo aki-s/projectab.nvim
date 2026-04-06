@@ -20,8 +20,6 @@ end
 function M.setup(opts)
   local config = require("projectab.config")
   local log = require("projectab.log")
-  local state = require("projectab.state")
-  local buffer = require("projectab.buffer")
 
   config.setup(opts)
 

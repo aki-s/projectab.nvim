@@ -2,15 +2,15 @@
 --- Handles JSON file I/O and path encoding for project state storage.
 ---
 --- Storage layout (under stdpath("data") .. "/projectab/"):
----   dashboard.json               — history of project roots
+---   persistence.json             — list of project roots
 ---   %Users%user1%app.json        — per-project state (buffers, active_buffer)
 ---
 --- Path encoding: "/" → "%" so that project roots become flat filenames.
 --- @class ProjectabPersistenceModule
 local M = {}
 
---- @class ProjectabDashboard
---- @field history string[] List of project root directories
+--- @class ProjectabPersistence
+--- @field sessions string[] List of project root directories
 --- @field version number Schema version
 
 --- @class ProjectabProjectState
@@ -53,17 +53,17 @@ function M.get_data_dir()
   return dir
 end
 
---- Return the path to dashboard.json.
+--- Return the path to persistence.json.
 --- @return string
-function M.get_dashboard_path()
-  return M.get_data_dir() .. "/dashboard.json"
+function M.get_persistence_path()
+  return M.get_data_dir() .. "/persistence.json"
 end
 
 --- Return the path to a per-project JSON file.
 --- @param root string Project root (absolute path)
 --- @return string
 function M.get_project_path(root)
-  return M.get_data_dir() .. "/" .. M.encode_path(root) .. ".json"
+  return M.get_data_dir() .. "/projects/" .. M.encode_path(root) .. ".json"
 end
 
 --- Read and decode a JSON file.
@@ -99,6 +99,8 @@ function M.write_json(path, data)
     log.debug_ctx("persistence: failed to encode JSON: " .. tostring(encoded))
     return false
   end
+  local parent = vim.fn.fnamemodify(path, ":h")
+  vim.fn.mkdir(parent, "p")
   local file = io.open(path, "w")
   if not file then
     log.debug_ctx("persistence: failed to open file for writing: " .. path)
@@ -109,23 +111,23 @@ function M.write_json(path, data)
   return true
 end
 
---- Load dashboard.json.
+--- Load persistence.json.
 --- Returns a default structure if the file does not exist.
---- @return ProjectabDashboard dashboard
-function M.load_dashboard()
-  --- @type ProjectabDashboard|nil
-  local data = M.read_json(M.get_dashboard_path())
+--- @return ProjectabPersistence
+function M.load_data()
+  --- @type ProjectabPersistence|nil
+  local data = M.read_json(M.get_persistence_path())
   if data and data.version then
     return data
   end
-  return { version = 1, history = {} }
+  return { version = 1, sessions = {} }
 end
 
---- Save dashboard.json.
---- @param dashboard ProjectabDashboard
+--- Save persistence.json.
+--- @param data ProjectabPersistence
 --- @return boolean success
-function M.save_dashboard(dashboard)
-  return M.write_json(M.get_dashboard_path(), dashboard)
+function M.save_data(data)
+  return M.write_json(M.get_persistence_path(), data)
 end
 
 --- Load per-project state from its JSON file.
@@ -152,36 +154,49 @@ function M.delete_project(root)
   log.debug_ctx("persistence: deleted project file: " .. path)
 end
 
---- Update dashboard history with a project root.
---- Moves/adds the root to the front of the history list.
---- @param dashboard ProjectabDashboard Dashboard data
---- @param root string Project root
---- @return ProjectabDashboard dashboard Updated dashboard
-function M.touch_history(dashboard, root)
-  local new_history = {}
-  table.insert(new_history, root)
-  for _, entry in ipairs(dashboard.history) do
-    if entry ~= root then
-      table.insert(new_history, entry)
-    end
+--- Return a list of project roots sorted by most recently saved.
+--- @param limit integer? Optional maximum number of results to return
+--- @return string[] Unencoded absolute paths of recent projects
+function M.list_projects_by_recency(limit)
+  limit = limit or 50
+  local projects_dir = M.get_data_dir() .. "/projects"
+  local stat = vim.uv.fs_stat(projects_dir)
+  if not stat or stat.type ~= "directory" then
+    return {}
   end
-  dashboard.history = new_history
-  return dashboard
-end
 
---- Remove a root from dashboard history.
---- @param dashboard ProjectabDashboard Dashboard data
---- @param root string Project root to remove
---- @return ProjectabDashboard dashboard Updated dashboard
-function M.remove_from_history(dashboard, root)
-  local new_history = {}
-  for _, entry in ipairs(dashboard.history) do
-    if entry ~= root then
-      table.insert(new_history, entry)
+  local scan = vim.uv.fs_scandir(projects_dir)
+  if not scan then
+    return {}
+  end
+
+  local projects = {} ---@type { root: string, last_saved: integer }[]
+  while true do
+    local name, type = vim.uv.fs_scandir_next(scan)
+    if not name then
+      break
+    end
+    if type == "file" and name:match("%.json$") then
+      local path = projects_dir .. "/" .. name
+      local data = M.read_json(path)
+      if data and data.root and data.last_saved then
+        table.insert(projects, { root = data.root, last_saved = data.last_saved })
+      end
     end
   end
-  dashboard.history = new_history
-  return dashboard
+
+  table.sort(projects, function(a, b)
+    return a.last_saved > b.last_saved
+  end)
+
+  local result = {}
+  for i, p in ipairs(projects) do
+    if i > limit then
+      break
+    end
+    table.insert(result, p.root)
+  end
+  return result
 end
 
 return M

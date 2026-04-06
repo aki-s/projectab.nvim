@@ -4,7 +4,7 @@
 --- Save flow:
 ---   1. For each registered project→tab, collect absolute buffer paths and active buffer.
 ---   2. Write per-project JSON via persistence module.
----   3. Update dashboard.json.
+---   3. Update persistence.json.
 ---
 --- Restore flow:
 ---   1. Read per-project JSON.
@@ -188,18 +188,20 @@ function M.project_save(root, tab_id)
   return ok
 end
 
---- Save all registered projects and update dashboard history.
+--- Save all registered projects
 --- Intended to be called on VimLeavePre or manually.
 function M.projects_save()
   local projects = state.list_projects()
-  local dashboard = persistence.load_dashboard()
+  local data = persistence.load_data()
 
+  local new_sessions = {}
   for root, tab_id in pairs(projects) do
     M.project_save(root, tab_id)
-    dashboard = persistence.touch_history(dashboard, root)
+    table.insert(new_sessions, root)
   end
+  data.sessions = new_sessions
 
-  persistence.save_dashboard(dashboard)
+  persistence.save_data(data)
   log.debug_ctx("session: save_all complete")
 end
 
@@ -211,9 +213,6 @@ function M.project_restore(root)
   if not vim.uv.fs_stat(root) then
     log.debug_ctx("session: project root does not exist, removing: " .. root)
     persistence.delete_project(root)
-    local dashboard = persistence.load_dashboard()
-    dashboard = persistence.remove_from_history(dashboard, root)
-    persistence.save_dashboard(dashboard)
     notify("Project no longer exists, removed: " .. root, vim.log.levels.WARN)
     return false
   end
@@ -275,13 +274,13 @@ function M.project_restore(root)
   return true
 end
 
---- Restore all (default to limit the latest 50) projects from dashboard history.
+--- Restore all (default to limit the latest 50) projects from session.
 --- Each project is restored into its own tab.
 --- @param opts? { limit?: integer }
 function M.projects_restore(opts)
   opts = opts or { limit = 50 }
   local limit = opts.limit
-  local dashboard = persistence.load_dashboard()
+  local data = persistence.load_data()
   local restored = 0
 
   -- Suspend buffer routing during bulk restore to prevent tab-spawning cascades
@@ -289,7 +288,7 @@ function M.projects_restore(opts)
   buffer.suspend()
 
   local ok, err = pcall(function()
-    for _, root in ipairs(dashboard.history) do
+    for _, root in ipairs(data.sessions) do
       if restored >= limit then
         break
       end
@@ -311,19 +310,10 @@ end
 
 --- Return a list of historically accessed project roots from persistence.
 --- @param opts? { limit?: integer } Optional options. `limit` caps the number of entries returned.
---- @return string[] history
-function M.list_history(opts)
+--- @return string[] session
+function M.list(opts)
   opts = opts or {}
-  local dashboard = persistence.load_dashboard()
-  local history = dashboard.history or {}
-  if opts.limit and opts.limit < #history then
-    local result = {}
-    for i = 1, opts.limit do
-      result[i] = history[i]
-    end
-    return result
-  end
-  return history
+  return persistence.list_projects_by_recency(opts.limit)
 end
 
 return M

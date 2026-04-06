@@ -1,9 +1,9 @@
 --- @class ProjectabUiDashboardModule
 local M = {}
 
-local state = require("projectab.state")
 local config = require("projectab.config")
-local projectab = require("projectab")
+local pick = require("projectab.ui.pick")
+local state = require("projectab.state")
 
 --- Open the standalone projectab dashboard.
 --- Replaces the current window's buffer with a new dashboard buffer.
@@ -16,9 +16,8 @@ function M.open()
 
   -- Collect projects
   local session = require("projectab.session")
-  local history = session.list_history()
   local items = {}
-  for _, root in ipairs(history) do
+  for _, root in ipairs(session.list()) do
     table.insert(items, {
       name = vim.fn.fnamemodify(root, ":t"),
       root = root,
@@ -63,8 +62,8 @@ function M.open()
   table.insert(lines, "")
   table.insert(lines, "  Commands:")
   table.insert(lines, "    [p] Pick Project")
-  -- TODO: select oproject or open project from history.
-  keymaps["p"] = projectab.pick_project
+  -- TODO: select oproject or open project from session.
+  keymaps["p"] = pick.project_pick
 
   table.insert(lines, "    [n] New empty tab")
   keymaps["n"] = function()

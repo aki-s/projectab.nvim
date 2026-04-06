@@ -163,7 +163,7 @@ Single-project commands (prefix `p-`):
 
 `:Projectab p-pick`                                    *:Projectab-p-pick*
   Open an interactive project picker (`vim.ui.select`).
-  Shows currently open projects and history. Also exposes snacks integration
+  Shows currently open projects and session. Also exposes snacks integration
   if enabled.
 
 `:Projectab p-close`                                   *:Projectab-p-close*
@@ -184,7 +184,7 @@ Multi-project commands (prefix `ps-`):
   Save session state for all open projects.
 
 `:Projectab ps-restore`                                *:Projectab-ps-restore*
-  Restore all projects from persistence history.
+  Restore all projects from persistence session.
 
 `:Projectab ps-clear-root-cache`                       *:Projectab-ps-clear-root-cache*
   Clear the root detection cache. Use this after `git init` or other
