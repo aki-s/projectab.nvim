@@ -33,7 +33,12 @@ function M.setup()
   vim.keymap.set("n", "<Plug>(projectab-save)", "<Cmd>Projectab ps-save<CR>", { desc = "Projectab: Save all projects" })
   safe_map("n", "<leader><TAB>S", "<Plug>(projectab-save)", { desc = "Projectab: Save all projects" })
 
-  vim.keymap.set("n", "<Plug>(projectab-quit)", "<Cmd>Projectab ps-quit<CR>", { desc = "Projectab: Save all projects and quit" })
+  vim.keymap.set(
+    "n",
+    "<Plug>(projectab-quit)",
+    "<Cmd>Projectab ps-quit<CR>",
+    { desc = "Projectab: Save all projects and quit" }
+  )
   safe_map("n", "<leader><TAB>q", "<Plug>(projectab-quit)", { desc = "Projectab: Save all projects and quit" })
 
   vim.keymap.set(
