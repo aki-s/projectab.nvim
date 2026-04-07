@@ -83,25 +83,25 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 | Command                        | Description                                          |
 |--------------------------------|------------------------------------------------------|
-| `:Projectab p-open <path>`     | Open a project in its own tab (or switch to it)      |
-| `:Projectab p-pick`            | Interactive project picker (`vim.ui.select`)         |
-| `:Projectab p-close`           | Save and close the current project tab               |
-| `:Projectab p-save`            | Save session state for the current project tab       |
-| `:Projectab p-restore <path>`  | Restore a single project from its saved state        |
 | `:Projectab p-bnext`           | Next listed buffer in the current project            |
 | `:Projectab p-bprev`           | Previous listed buffer in the current project        |
+| `:Projectab p-close`           | Save and close the current project tab               |
+| `:Projectab p-open <path>`     | Open a project in its own tab (or switch to it)      |
+| `:Projectab p-pick`            | Interactive project picker (`vim.ui.select`)         |
+| `:Projectab p-restore <path>`  | Restore a single project from its saved state        |
+| `:Projectab p-save`            | Save session state for the current project tab       |
 
 ### Multi-project commands (`ps-` prefix)
 
 | Command                          | Description                                          |
 |----------------------------------|------------------------------------------------------|
-| `:Projectab ps-list`             | List all registered projects and their tab IDs       |
-| `:Projectab ps-save`             | Save session state for all open projects             |
-| `:Projectab ps-quit`             | Save session state for all open projects and exit Neovim |
-| `:Projectab ps-restore`          | Restore all projects from persistence session        |
 | `:Projectab ps-clear-root-cache` | Clear the root detection cache                       |
-| `:Projectab ps-reorganize`       | Consolidate duplicate tabs, move misplaced buffers   |
 | `:Projectab ps-close-empty-tab`  | Close tabs with only unnamed/empty buffers           |
+| `:Projectab ps-list`             | List all registered projects and their tab IDs       |
+| `:Projectab ps-quit`             | Save session state for all open projects and exit Neovim |
+| `:Projectab ps-reorganize`       | Consolidate duplicate tabs, move misplaced buffers   |
+| `:Projectab ps-restore`          | Restore all projects from persistence session        |
+| `:Projectab ps-save`             | Save session state for all open projects             |
 | `:Projectab ps-toggle-routing`   | Toggle automatic buffer routing on/off               |
 
 ## Keymaps
@@ -112,33 +112,33 @@ The plugin provides `<Plug>` mappings for easier integration with frameworks lik
 
 | `<Plug>` mapping                      | Description                              |
 |---------------------------------------|------------------------------------------|
-| `<Plug>(projectab-pick)`              | Open interactive project picker          |
-| `<Plug>(projectab-list)`              | List all registered projects             |
-| `<Plug>(projectab-save)`              | Save all project states                  |
-| `<Plug>(projectab-quit)`              | Save all project states and quit         |
-| `<Plug>(projectab-restore)`           | Restore all project states               |
-| `<Plug>(projectab-save-project)`      | Save the current project state           |
-| `<Plug>(projectab-restore-project)`   | Restore a single project                 |
-| `<Plug>(projectab-cache-clear)`       | Clear the root detection cache           |
-| `<Plug>(projectab-reorganize)`        | Reorganize tabs and buffers              |
 | `<Plug>(projectab-bnext)`             | Next buffer in project                   |
 | `<Plug>(projectab-bprevious)`         | Previous buffer in project               |
+| `<Plug>(projectab-cache-clear)`       | Clear the root detection cache           |
+| `<Plug>(projectab-list)`              | List all registered projects             |
+| `<Plug>(projectab-pick)`              | Open interactive project picker          |
+| `<Plug>(projectab-quit)`              | Save all project states and quit         |
+| `<Plug>(projectab-reorganize)`        | Reorganize tabs and buffers              |
+| `<Plug>(projectab-restore)`           | Restore all project states               |
+| `<Plug>(projectab-restore-project)`   | Restore a single project                 |
+| `<Plug>(projectab-save)`              | Save all project states                  |
+| `<Plug>(projectab-save-project)`      | Save the current project state           |
 
 ### Default Fallback Mappings
 
 | Key               | Mode | Target                              | Description                     |
 |-------------------|------|-------------------------------------|---------------------------------|
-| `<leader><TAB>p`  | n    | `<Plug>(projectab-pick)`            | Open interactive project picker |
-| `<leader><TAB>l`  | n    | `<Plug>(projectab-list)`            | List all registered projects    |
-| `<leader><TAB>S`  | n    | `<Plug>(projectab-save)`            | Save all project states         |
-| `<leader><TAB>q`  | n    | `<Plug>(projectab-quit)`            | Save all project states and quit|
-| `<leader><TAB>R`  | n    | `<Plug>(projectab-restore)`         | Restore all project states      |
-| `<leader><TAB>s`  | n    | `<Plug>(projectab-save-project)`    | Save the current project state  |
-| `<leader><TAB>r`  | n    | `<Plug>(projectab-restore-project)` | Restore a single project        |
-| `<leader><TAB>c`  | n    | `<Plug>(projectab-cache-clear)`     | Clear the root detection cache  |
 | `<leader><TAB>F`  | n    | `<Plug>(projectab-reorganize)`      | Reorganize tabs and buffers     |
-| `<leader><TAB>]`  | n    | `<Plug>(projectab-bnext)`           | Next buffer in project          |
+| `<leader><TAB>R`  | n    | `<Plug>(projectab-restore)`         | Restore all project states      |
+| `<leader><TAB>S`  | n    | `<Plug>(projectab-save)`            | Save all project states         |
 | `<leader><TAB>[`  | n    | `<Plug>(projectab-bprevious)`       | Previous buffer in project      |
+| `<leader><TAB>]`  | n    | `<Plug>(projectab-bnext)`           | Next buffer in project          |
+| `<leader><TAB>c`  | n    | `<Plug>(projectab-cache-clear)`     | Clear the root detection cache  |
+| `<leader><TAB>l`  | n    | `<Plug>(projectab-list)`            | List all registered projects    |
+| `<leader><TAB>p`  | n    | `<Plug>(projectab-pick)`            | Open interactive project picker |
+| `<leader><TAB>q`  | n    | `<Plug>(projectab-quit)`            | Save all project states and quit|
+| `<leader><TAB>r`  | n    | `<Plug>(projectab-restore-project)` | Restore a single project        |
+| `<leader><TAB>s`  | n    | `<Plug>(projectab-save-project)`    | Save the current project state  |
 
 Default keymaps are only set if not already mapped by the user. If you are using a framework like LazyVim, you can map your preferred keys directly to these `<Plug>` mappings in your plugin configuration.
 

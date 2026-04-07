@@ -106,24 +106,25 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 | Command | Description |
 |---------|-------------|
-| `:Projectab p-open <path>` | Open a project in its own tab (or switch to it) |
-| `:Projectab p-pick` | Interactive project picker |
-| `:Projectab p-close` | Save and close the current project tab |
-| `:Projectab p-save` | Save the current project session |
-| `:Projectab p-restore <path>` | Restore a single project from its saved state |
 | `:Projectab p-bnext` | Next buffer in the current project |
 | `:Projectab p-bprev` | Previous buffer in the current project |
+| `:Projectab p-close` | Save and close the current project tab |
+| `:Projectab p-open <path>` | Open a project in its own tab (or switch to it) |
+| `:Projectab p-pick` | Interactive project picker |
+| `:Projectab p-restore <path>` | Restore a single project from its saved state |
+| `:Projectab p-save` | Save the current project session |
 
 **Multi-project (`ps-` prefix):**
 
 | Command | Description |
 |---------|-------------|
-| `:Projectab ps-list` | List all registered projects and their tab IDs |
-| `:Projectab ps-save` | Save all project sessions |
-| `:Projectab ps-restore` | Restore all project sessions |
 | `:Projectab ps-clear-root-cache` | Clear the root detection cache |
-| `:Projectab ps-reorganize` | Consolidate duplicate tabs, move misplaced buffers |
 | `:Projectab ps-close-empty-tab` | Close tabs with only unnamed/empty buffers |
+| `:Projectab ps-list` | List all registered projects and their tab IDs |
+| `:Projectab ps-quit` | Save session state for all open projects and exit Neovim |
+| `:Projectab ps-reorganize` | Consolidate duplicate tabs, move misplaced buffers |
+| `:Projectab ps-restore` | Restore all project sessions |
+| `:Projectab ps-save` | Save all project sessions |
 | `:Projectab ps-toggle-routing` | Toggle automatic buffer routing on/off |
 | `:checkhealth projectab` | Verify installation and integration status |
 
@@ -131,16 +132,17 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 | Key | Description |
 |-----|-------------|
-| `<leader><TAB>p` | Pick project |
-| `<leader><TAB>S` | Save all projects |
-| `<leader><TAB>R` | Restore all projects |
-| `<leader><TAB>s` | Save current project |
-| `<leader><TAB>r` | Restore a project |
-| `<leader><TAB>c` | Clear root detection cache |
 | `<leader><TAB>F` | Reorganize tabs and buffers (move a buffer if it is displayed in the other project. Unify duplicate project split across tabs if it exists) |
-| `<leader><TAB>l` | List projects |
+| `<leader><TAB>R` | Restore all projects |
+| `<leader><TAB>S` | Save all projects |
 | `<leader><TAB>[` | Previous buffer in project |
 | `<leader><TAB>]` | Next buffer in project |
+| `<leader><TAB>c` | Clear root detection cache |
+| `<leader><TAB>l` | List projects |
+| `<leader><TAB>p` | Pick project |
+| `<leader><TAB>q` | Save all projects and quit |
+| `<leader><TAB>r` | Restore a project |
+| `<leader><TAB>s` | Save current project |
 
 Default keymaps are only set if not already mapped. All actions are also available
 as `<Plug>` mappings for framework users (LazyVim, etc.).
