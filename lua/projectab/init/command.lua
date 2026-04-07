@@ -2,9 +2,12 @@
 --- @class ProjectabInitCommand
 local M = {}
 
+-- CMDs are sort alphabetically in asc
+
 local CMD_PROJECTS_CLEAR_ROOT_CACHE = "ps-clear-root-cache"
 local CMD_PROJECTS_CLOSE_EMPTY_TAB = "ps-close-empty-tab"
 local CMD_PROJECTS_LIST = "ps-list"
+local CMD_PROJECTS_QUIT = "ps-quit"
 local CMD_PROJECTS_REORGANIZE = "ps-reorganize"
 local CMD_PROJECTS_RESTORE = "ps-restore"
 local CMD_PROJECTS_SAVE = "ps-save"
@@ -25,6 +28,7 @@ function M.setup()
   -- User commands
   vim.api.nvim_create_user_command("Projectab", function(cmd_opts)
     local subcmd = cmd_opts.fargs[1]
+    -- Check command in alphabetically
     if subcmd == CMD_PROJECTS_CLEAR_ROOT_CACHE then
       require("projectab.detect").projects_clear_root_cache()
       notify("Root detection cache cleared", vim.log.levels.INFO)
@@ -44,6 +48,10 @@ function M.setup()
       else
         notify("No project is opened", vim.log.levels.INFO)
       end
+    elseif subcmd == CMD_PROJECTS_QUIT then
+      local session = require("projectab.session")
+      session.projects_save()
+      vim.cmd("xa")
     elseif subcmd == CMD_PROJECTS_REORGANIZE then
       require("projectab.cleanup").projects_reorganize()
     elseif subcmd == CMD_PROJECTS_RESTORE then
@@ -93,10 +101,12 @@ function M.setup()
     else
       notify(
         string.format(
-          "Subcommands: %s | %s | %s | %s | %s | %s | %s| %s | %s | %s <path> | %s | %s <path> | %s | %s",
+          "Subcommands: %s | %s | %s | %s | %s | %s | %s | %s| %s | %s | %s <path> | %s | %s <path> | %s | %s",
+          -- sort command in alphabetically
           CMD_PROJECTS_CLEAR_ROOT_CACHE,
           CMD_PROJECTS_CLOSE_EMPTY_TAB,
           CMD_PROJECTS_LIST,
+          CMD_PROJECTS_QUIT,
           CMD_PROJECTS_REORGANIZE,
           CMD_PROJECTS_RESTORE,
           CMD_PROJECTS_SAVE,
@@ -118,9 +128,11 @@ function M.setup()
       local args = vim.split(line, "%s+")
       if #args <= 2 then
         return {
+          -- sort command in alphabetically
           CMD_PROJECTS_CLEAR_ROOT_CACHE,
           CMD_PROJECTS_CLOSE_EMPTY_TAB,
           CMD_PROJECTS_LIST,
+          CMD_PROJECTS_QUIT,
           CMD_PROJECTS_REORGANIZE,
           CMD_PROJECTS_RESTORE,
           CMD_PROJECTS_SAVE,

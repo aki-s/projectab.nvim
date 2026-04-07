@@ -97,6 +97,7 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 |----------------------------------|------------------------------------------------------|
 | `:Projectab ps-list`             | List all registered projects and their tab IDs       |
 | `:Projectab ps-save`             | Save session state for all open projects             |
+| `:Projectab ps-quit`             | Save session state for all open projects and exit Neovim |
 | `:Projectab ps-restore`          | Restore all projects from persistence session        |
 | `:Projectab ps-clear-root-cache` | Clear the root detection cache                       |
 | `:Projectab ps-reorganize`       | Consolidate duplicate tabs, move misplaced buffers   |
@@ -114,6 +115,7 @@ The plugin provides `<Plug>` mappings for easier integration with frameworks lik
 | `<Plug>(projectab-pick)`              | Open interactive project picker          |
 | `<Plug>(projectab-list)`              | List all registered projects             |
 | `<Plug>(projectab-save)`              | Save all project states                  |
+| `<Plug>(projectab-quit)`              | Save all project states and quit         |
 | `<Plug>(projectab-restore)`           | Restore all project states               |
 | `<Plug>(projectab-save-project)`      | Save the current project state           |
 | `<Plug>(projectab-restore-project)`   | Restore a single project                 |
@@ -129,6 +131,7 @@ The plugin provides `<Plug>` mappings for easier integration with frameworks lik
 | `<leader><TAB>p`  | n    | `<Plug>(projectab-pick)`            | Open interactive project picker |
 | `<leader><TAB>l`  | n    | `<Plug>(projectab-list)`            | List all registered projects    |
 | `<leader><TAB>S`  | n    | `<Plug>(projectab-save)`            | Save all project states         |
+| `<leader><TAB>q`  | n    | `<Plug>(projectab-quit)`            | Save all project states and quit|
 | `<leader><TAB>R`  | n    | `<Plug>(projectab-restore)`         | Restore all project states      |
 | `<leader><TAB>s`  | n    | `<Plug>(projectab-save-project)`    | Save the current project state  |
 | `<leader><TAB>r`  | n    | `<Plug>(projectab-restore-project)` | Restore a single project        |
