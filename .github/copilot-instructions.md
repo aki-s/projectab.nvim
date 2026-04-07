@@ -111,4 +111,3 @@ Modules use `pcall()` for optional integrations (e.g., trying to load `snacks.nv
 
 - **Function parameters**: Use full words (`project_root` not `root`, `tab_id` not `tid`)
 - **Local variables**: Descriptive names for clarity (`existing_tab`, `new_tab_id`)
-- **Complexity**: Include complexity notes in comments (e.g., "O(1) time" in `state.lua`)
