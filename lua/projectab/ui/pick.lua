@@ -6,7 +6,6 @@ local M = {}
 --- @field label string Display string for vim.ui.select
 --- @field root string|nil Project root path (nil for meta-items)
 --- @field tab_id integer|nil Tab handle (only for already-open projects)
---- @field type string Category: "tab" | "hist_projectab" | "hist_entry" | "integ_snacks" | "dir"
 
 --- Build a PickAction for an already-open project tab.
 --- @param root string
@@ -19,7 +18,6 @@ local function _make_tab_item(root, tab_id)
     label = string.format("%s  (%s)", name, root),
     root = root,
     tab_id = tab_id,
-    type = "tab",
     action = function(self)
       vim.api.nvim_set_current_tabpage(self.tab_id)
       log.debug_ctx(string.format("pick_project: switched to tab=%d for root=%s", self.tab_id, self.root))
@@ -36,7 +34,6 @@ local function _make_history_pick_item()
     label = "🕒 Open project using Projectab...",
     root = nil,
     tab_id = nil,
-    type = "hist_projectab",
     action = function(_self)
       local hist = session.list({ limit = 50 })
       if not hist or #hist == 0 then
@@ -72,7 +69,6 @@ local function _make_snacks_item()
     label = "🍿 Open project using Snacks...",
     root = nil,
     tab_id = nil,
-    type = "integ_snacks",
     action = function(_self)
       local ok, snacks_int = pcall(require, "projectab.integrations.snacks")
       ---@cast snacks_int ProjectabSnacksIntegration
@@ -94,7 +90,6 @@ local function _make_dir_item()
     label = "📂 Open directory...",
     root = nil,
     tab_id = nil,
-    type = "dir",
     action = function(_self)
       config.values.project.directory_picker_func(
         { prompt = "Project directory: ", completion = "dir" },
@@ -119,7 +114,6 @@ local function _make_history_entry_item(root)
     label = string.format("🕒 %s  (%s)", name, root),
     root = root,
     tab_id = nil,
-    type = "hist_entry",
     action = function(self)
       log.debug_ctx(string.format("pick_project: restore history entry root=%s", self.root))
       session.project_restore(self.root)
