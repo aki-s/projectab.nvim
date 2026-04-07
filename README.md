@@ -3,18 +3,28 @@
 [![CI](https://github.com/aki-s/Projectab.nvim/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/aki-s/Projectab.nvim/actions/workflows/ci.yaml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Neovim plugin to manage projects via tabs efficiently.
+Neovim plugin to manage each project per tab.
 
-**"1 project = 1 tab"** — Automatically routes buffers to their project's dedicated tab,
-with the tab's working directory (`tcd`) set to the project root.
+A project is default to a Git root, but you can configure as you like.
+
+## Key ideas (restraints to achieve `Projectab`)
+
+- **"1 project = 1 tab"**
+  - Each tab's root is defined with `tcd` (tab-local working directory).
+- Each project lists only buffers belonging to the project.
+  - Automatic buffer routing: opening any file lands you in the correct project tab
 
 ## Features
 
-- Automatic buffer routing: opening any file lands you in the correct project tab
-- Native `tcd` integration — no global `cd`, no LSP/picker disruption
 - Session save/restore: project tabs and buffers survive Neovim restarts
-- Root detection cache (O(1) on hot path, `BufEnter` safe)
-- Optional integrations: snacks.nvim picker & dashboard, bufferline.nvim groups, project.nvim detection
+- Optional integrations:
+  - [snacks.nvim](https://github.com/folke/snacks.nvim) picker
+  - snacks.nvim dashboard
+  - Experimental
+    - [bufferline.nvim](https://github.com/akinsho/bufferline.nvim/) groups
+    - [project.nvim](https://github.com/ahmedkhalf/project.nvim) detection
+- Other plugins which co-exists:
+  - [folke/persistence.nvim](https://github.com/folke/persistence.nvim) (Automatic buffer routing handles this natively without explicit dependency)
 - Built-in tabline (falls back when bufferline is not in use)
 - `:checkhealth projectab` support
 
@@ -24,12 +34,36 @@ with the tab's working directory (`tcd`) set to the project root.
 
 ## Installation
 
+### Minimal (no persistence, no integrations)
+
+```lua
+{
+  "aki-s/projectab.nvim",
+  event = "VeryLazy",
+  opts = {},
+}
+```
+
 ### lazy.nvim
 
 ```lua
 {
   "aki-s/projectab.nvim",
   event = "VeryLazy",
+  dependencies = {
+    {
+      "folke/snacks.nvim",
+      optional = true,
+    },
+    {
+      "akinsho/bufferline.nvim",
+      optional = true,
+    },
+    {
+      "ahmedkhalf/project.nvim",
+      optional = true,
+    },
+  },
   opts = {
     -- Optional: override default project root markers
     project = {
@@ -52,16 +86,6 @@ with the tab's working directory (`tcd`) set to the project root.
 }
 ```
 
-### Minimal (no persistence, no integrations)
-
-```lua
-{
-  "aki-s/projectab.nvim",
-  event = "VeryLazy",
-  opts = {},
-}
-```
-
 ## Optional Dependencies
 
 All integrations are opt-in and gracefully disabled when the plugin is not installed:
@@ -69,7 +93,6 @@ All integrations are opt-in and gracefully disabled when the plugin is not insta
 | Plugin | Purpose |
 |--------|---------|
 | [folke/snacks.nvim](https://github.com/folke/snacks.nvim) | `snacks.picker.projects` for project selection + dashboard section |
-| [folke/persistence.nvim](https://github.com/folke/persistence.nvim) | Session restore compatible (listens to `SessionLoadPost`) |
 | [akinsho/bufferline.nvim](https://github.com/akinsho/bufferline.nvim) | Per-project buffer grouping in the tabline |
 | [ahmedkhalf/project.nvim](https://github.com/ahmedkhalf/project.nvim) | Alternative project root detection |
 
@@ -114,7 +137,7 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 | `<leader><TAB>s` | Save current project |
 | `<leader><TAB>r` | Restore a project |
 | `<leader><TAB>c` | Clear root detection cache |
-| `<leader><TAB>F` | Reorganize tabs and buffers |
+| `<leader><TAB>F` | Reorganize tabs and buffers (move a buffer if it is displayed in the other project. Unify duplicate project split across tabs if it exists) |
 | `<leader><TAB>l` | List projects |
 | `<leader><TAB>[` | Previous buffer in project |
 | `<leader><TAB>]` | Next buffer in project |
@@ -174,8 +197,8 @@ in the new project tab.
           recent    = true,
           max_depth = 3,
           dev = {
-            "~/git.d/github.com/",
-            "~/git.d/gitlab.com/",
+            "~/`<your-path-to-repo-root>`/github.com/",
+            "~/`<your-path-to-repo-root>`/gitlab.com/",
           },
         },
       },
@@ -196,7 +219,7 @@ selecting one calls `session.project_restore()`.
 -- Inside your snacks.nvim opts:
 {
   "folke/snacks.nvim",
-  dependencies = { { "aki-s/projectab.nvim", optional = true } },
+  dependencies = { { "aki-s/projectab.nvim" } },
   opts = {
     dashboard = {
       sections = {
@@ -214,9 +237,9 @@ selecting one calls `session.project_restore()`.
         {
           pane   = 1,
           key    = "R",
-          title  = "Projectab: restore all projects",
+          title  = "Projectab: restore all projects (up to 12)",
           action = function()
-            require("projectab.session").projects_restore({ limit = 3 })
+            require("projectab.session").projects_restore({ limit = 12 })
           end,
         },
       },
@@ -231,9 +254,6 @@ selecting one calls `session.project_restore()`.
 |----------|--------------------|---------|---------------------------------------------------|
 | `limit`  | `number`           | `5`     | Maximum number of projects to show                |
 | `action` | `fun(dir: string)` | `nil`   | Override item action (default: `project_restore`) |
-
-> **Note:** Disable `ui.dashboard.enabled` in Projectab when using the
-> snacks.nvim dashboard, otherwise both dashboards may open on startup.
 
 ## Health Check
 
