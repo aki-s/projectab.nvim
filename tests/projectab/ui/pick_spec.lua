@@ -180,26 +180,35 @@ describe("projectab.ui.pick", function()
   end)
 
   it("all items have expected label patterns for default config", function()
+    -- Mock session.list to ensure we have history items to check
+    local session = require("projectab.session")
+    local orig_list = session.list
+    session.list = function()
+      return { "/tmp/hist_proj" }
+    end
+
     pick.project_pick()
     local items = select_calls[1].items
 
-    -- With no projects and default config (snacks disabled), expect:
-    -- 1. "🕒 Open project using Projectab..."
-    -- 2. "📂 Open directory..."
-    -- (plus any history entries from persistence, which may be 0)
+    -- Restore session.list
+    session.list = orig_list
+
+    -- With default config (snacks disabled), expect:
+    -- 1. "📂 Open directory..."
+    -- 2. "🕒 hist_proj  (/tmp/hist_proj)"
     assert.is_true(#items >= 2, "Expected at least 2 items, got " .. #items)
 
-    local has_history_picker = false
+    local has_hist_entry = false
     local has_dir = false
     for _, label in ipairs(items) do
-      if label:find("Open project using Projectab") then
-        has_history_picker = true
+      if label:find("🕒 hist_proj") then
+        has_hist_entry = true
       end
       if label:find("Open directory") then
         has_dir = true
       end
     end
-    assert.is_true(has_history_picker, "Expected history picker item")
+    assert.is_true(has_hist_entry, "Expected history entry item")
     assert.is_true(has_dir, "Expected directory item")
   end)
 

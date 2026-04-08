@@ -11,7 +11,7 @@ local M = {}
 --- @param root string
 --- @param tab_id integer
 --- @return PickAction
-local function _make_tab_item(root, tab_id)
+function M.make_tab_item(root, tab_id)
   local log = require("projectab.log")
   local name = vim.fn.fnamemodify(root, ":t")
   return {
@@ -25,17 +25,24 @@ local function _make_tab_item(root, tab_id)
   }
 end
 
+--- @class HistoryPicOption
+--- @field limit integer
+--- Utility type for plugin users to customize their picker via opts.actions
+
 --- Build a PickAction for the 2-stage Projectab history picker.
+--- Utility method for plugin users to customize their picker via opts.actions
+--- @param opts? HistoryPicOption
 --- @return PickAction
-local function _make_history_pick_item()
+function M.make_history_pick_item(opts)
   local session = require("projectab.session")
   local notify = require("projectab.ui.notify")
+  local _opts = opts or { limit = 1000 }
   return {
     label = "🕒 Open project using Projectab...",
     root = nil,
     tab_id = nil,
     action = function(_self)
-      local hist = session.list({ limit = 50 })
+      local hist = session.list(_opts)
       if not hist or #hist == 0 then
         notify("No project history found", vim.log.levels.INFO)
         return
@@ -61,7 +68,7 @@ end
 
 --- Build a PickAction for the snacks.nvim project picker.
 --- @return PickAction
-local function _make_snacks_item()
+function M.make_snacks_item()
   local config = require("projectab.config")
   local session = require("projectab.session")
   local notify = require("projectab.ui.notify")
@@ -83,7 +90,7 @@ end
 
 --- Build a PickAction for the "Open directory..." prompt.
 --- @return PickAction
-local function _make_dir_item()
+function M.make_dir_item()
   local config = require("projectab.config")
   local session = require("projectab.session")
   return {
@@ -106,7 +113,7 @@ end
 --- Build a PickAction for a history entry (single-step selection).
 --- @param root string
 --- @return PickAction
-local function _make_history_entry_item(root)
+function M.make_history_entry_item(root)
   local log = require("projectab.log")
   local session = require("projectab.session")
   local name = vim.fn.fnamemodify(root, ":t")
@@ -124,7 +131,7 @@ end
 --- Build a default PickActions
 ---
 -- @return PickAction[]
-local function _defaultPickerActions()
+function M.defaultPickerActions()
   local items = {}
   local config = require("projectab.config")
   local state = require("projectab.state")
@@ -132,25 +139,25 @@ local function _defaultPickerActions()
   local projects = state.list_projects()
 
   for root, tab_id in pairs(projects) do
-    table.insert(items, _make_tab_item(root, tab_id))
+    table.insert(items, M.make_tab_item(root, tab_id))
   end
   table.sort(items, function(a, b)
     return a.label < b.label
   end)
 
-  table.insert(items, _make_history_pick_item())
+  table.insert(items, M.make_history_pick_item())
 
   if config.values.integrations.snacks.enabled then
-    table.insert(items, _make_snacks_item())
+    table.insert(items, M.make_snacks_item())
   end
 
-  table.insert(items, _make_dir_item())
+  table.insert(items, M.make_dir_item())
 
   -- Append history entries directly below "📂 Open directory..."
-  local history = session.list({ limit = 50 })
+  local history = session.list({ limit = 1000 })
   for _, root in ipairs(history) do
     if not projects[root] then
-      table.insert(items, _make_history_entry_item(root))
+      table.insert(items, M.make_history_entry_item(root))
     end
   end
   return items
@@ -174,7 +181,7 @@ function M.project_pick(opts)
       table.insert(items, action_fn())
     end
   else
-    items = _defaultPickerActions()
+    items = M.defaultPickerActions()
   end
 
   -- Build labels for vim.ui.select
