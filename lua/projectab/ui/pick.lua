@@ -145,8 +145,6 @@ function M.defaultPickerActions()
     return a.label < b.label
   end)
 
-  table.insert(items, M.make_history_pick_item())
-
   if config.values.integrations.snacks.enabled then
     table.insert(items, M.make_snacks_item())
   end
