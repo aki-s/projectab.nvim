@@ -3,6 +3,8 @@
 local M = {}
 
 --- Register keymaps
+---
+--- keys are bound in ASCII code table.
 function M.setup()
   -- Helper to set keymaps only if not already mapped by the user
   local function safe_map(mode, lhs, rhs, map_opts)
@@ -24,6 +26,14 @@ function M.setup()
 
   vim.keymap.set(
     "n",
+    "<Plug>(projectab-quit)",
+    "<Cmd>Projectab ps-quit<CR>",
+    { desc = "Projectab: Save all projects and quit" }
+  )
+  safe_map("n", "<leader><TAB>Q", "<Plug>(projectab-quit)", { desc = "Projectab: Save all projects and quit" })
+
+  vim.keymap.set(
+    "n",
     "<Plug>(projectab-restore)",
     "<Cmd>Projectab ps-restore<CR>",
     { desc = "Projectab: Restore all projects" }
@@ -35,11 +45,19 @@ function M.setup()
 
   vim.keymap.set(
     "n",
-    "<Plug>(projectab-quit)",
-    "<Cmd>Projectab ps-quit<CR>",
-    { desc = "Projectab: Save all projects and quit" }
+    "<Plug>(projectab-bnext)",
+    "<Cmd>Projectab p-bnext<CR>",
+    { desc = "Projectab: Next buffer in project" }
   )
-  safe_map("n", "<leader><TAB>q", "<Plug>(projectab-quit)", { desc = "Projectab: Save all projects and quit" })
+  safe_map("n", "<leader><TAB>]", "<Plug>(projectab-bnext)", { desc = "Projectab: Next buffer in project" })
+
+  vim.keymap.set(
+    "n",
+    "<Plug>(projectab-bprevious)",
+    "<Cmd>Projectab p-bprev<CR>",
+    { desc = "Projectab: Previous buffer in project" }
+  )
+  safe_map("n", "<leader><TAB>[", "<Plug>(projectab-bprevious)", { desc = "Projectab: Previous buffer in project" })
 
   vim.keymap.set(
     "n",
@@ -62,23 +80,6 @@ function M.setup()
     { desc = "Projectab: Save current project" }
   )
   safe_map("n", "<leader><TAB>s", "<Plug>(projectab-save-project)", { desc = "Projectab: Save current project" })
-
-  -- Navigation commands
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-bnext)",
-    "<Cmd>Projectab p-bnext<CR>",
-    { desc = "Projectab: Next buffer in project" }
-  )
-  safe_map("n", "<leader><TAB>]", "<Plug>(projectab-bnext)", { desc = "Projectab: Next buffer in project" })
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-bprevious)",
-    "<Cmd>Projectab p-bprev<CR>",
-    { desc = "Projectab: Previous buffer in project" }
-  )
-  safe_map("n", "<leader><TAB>[", "<Plug>(projectab-bprevious)", { desc = "Projectab: Previous buffer in project" })
 end
 
 return M

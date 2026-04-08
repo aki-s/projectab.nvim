@@ -51,7 +51,8 @@ function M.setup()
     elseif subcmd == CMD_PROJECTS_QUIT then
       local session = require("projectab.session")
       session.projects_save()
-      vim.cmd("xa")
+      pcall(vim.cmd, "wa")
+      vim.cmd("qa")
     elseif subcmd == CMD_PROJECTS_REORGANIZE then
       require("projectab.cleanup").projects_reorganize()
     elseif subcmd == CMD_PROJECTS_RESTORE then
