@@ -127,6 +127,64 @@ describe("projectab.buffer integration", function()
     assert.is_nil(state.get_tab(tmp_root .. "/projectA"))
   end)
 
+  it("skips routing for unlisted buffers", function()
+    -- Buffers that are unlisted (e.g. scratch buffers) should not trigger routing.
+    local bufnr = vim.fn.bufadd(tmp_root .. "/projectA/file_unlisted.txt")
+    vim.fn.bufload(bufnr)
+    vim.bo[bufnr].buflisted = false
+
+    local initial_tab = vim.api.nvim_get_current_tabpage()
+    buffer.handle_buf_enter(bufnr)
+
+    -- Should not route or register tab
+    assert.are.equal(initial_tab, vim.api.nvim_get_current_tabpage())
+    assert.is_nil(state.get_tab(tmp_root .. "/projectA"))
+  end)
+
+  it("skips routing for unnamed buffers", function()
+    -- Empty [No Name] buffers shouldn't route to any project.
+    local bufnr = vim.api.nvim_create_buf(false, true)
+
+    local initial_tab = vim.api.nvim_get_current_tabpage()
+    buffer.handle_buf_enter(bufnr)
+
+    assert.are.equal(initial_tab, vim.api.nvim_get_current_tabpage())
+  end)
+
+  it("closes the source split window if buffer was routed to a different tab", function()
+    local current_tab = vim.api.nvim_get_current_tabpage()
+    state.register(tmp_root .. "/projectA", current_tab)
+
+    -- Create another tab for projectB
+    vim.cmd("tabnew")
+    local target_tab = vim.api.nvim_get_current_tabpage()
+    state.register(tmp_root .. "/projectB", target_tab)
+
+    -- Go back to projectA tab and create a split
+    vim.api.nvim_set_current_tabpage(current_tab)
+    vim.cmd("vsplit")
+    local win_count_before = #vim.api.nvim_tabpage_list_wins(current_tab)
+
+    -- Open projectB buffer in this split (should trigger routing)
+    local bufnr_B = vim.fn.bufadd(tmp_root .. "/projectB/file2.txt")
+    vim.fn.bufload(bufnr_B)
+    vim.bo[bufnr_B].buflisted = true
+
+    buffer.handle_buf_enter(bufnr_B)
+
+    -- Pump event loop for vim.schedule (since window cleanup runs asynchronously)
+    vim.wait(50, function()
+      return false
+    end)
+
+    -- We should now be in Project B's tab
+    assert.are.equal(target_tab, vim.api.nvim_get_current_tabpage())
+
+    -- The split in Project A's tab should have been closed
+    local win_count_after = #vim.api.nvim_tabpage_list_wins(current_tab)
+    assert.are.equal(win_count_before - 1, win_count_after)
+  end)
+
   it("registers unclaimed current tab to a new project buffer", function()
     -- When the current tab has no project association, it should be claimed
     -- by the first project buffer that enters it.
@@ -339,7 +397,7 @@ describe("projectab.buffer.clean_misplaced_buffers", function()
         root_markers = { ".git" },
         excluded_root_dirs = {},
       },
-      debug = { file = false, notify = false },
+      debug = { file = true, notify = false },
       integrations = { project_nvim = false, bufferline = false },
     })
     state._reset()
@@ -486,6 +544,46 @@ describe("projectab.buffer.clean_misplaced_buffers", function()
     assert.are.equal(#tabs_before, #tabs_after)
     assert.are.equal(wins_before, #vim.api.nvim_tabpage_list_wins(tab1))
   end)
+
+  it("cleans up misplaced hidden buffers from _tab_buffers cache", function()
+    tmp_root = vim.fn.tempname()
+    vim.fn.mkdir(tmp_root, "p")
+    tmp_root = vim.uv.fs_realpath(tmp_root) or tmp_root
+    vim.fn.mkdir(tmp_root .. "/projectA/.git", "p")
+    vim.fn.mkdir(tmp_root .. "/projectB/.git", "p")
+
+    local tab1 = vim.api.nvim_get_current_tabpage()
+    state.register(tmp_root .. "/projectA", tab1)
+
+    vim.cmd("tabnew")
+    local tab2 = vim.api.nvim_get_current_tabpage()
+    state.register(tmp_root .. "/projectB", tab2)
+
+    local filepath_A = tmp_root .. "/projectA/hidden.txt"
+    local f = io.open(filepath_A, "w")
+    if f then
+      f:write("hidden buffer simulation")
+      f:close()
+    end
+
+    local bufnr_A = vim.fn.bufadd(filepath_A)
+    vim.fn.bufload(bufnr_A)
+    vim.api.nvim_set_option_value("buflisted", true, { buf = bufnr_A })
+    vim.api.nvim_set_option_value("buftype", "", { buf = bufnr_A })
+
+    buffer._tab_buffers[tab2] = { bufnr_A }
+
+    buffer.clean_misplaced_buffers()
+
+    local tab2_cache = buffer._tab_buffers[tab2] or {}
+    local found_in_B = false
+    for _, b in ipairs(tab2_cache) do
+      if b == bufnr_A then
+        found_in_B = true
+      end
+    end
+    assert.is_false(found_in_B, "projectA buffer erroneously remained in projectB's cache!")
+  end)
 end)
 
 describe("projectab.buffer reentrancy guard", function()
@@ -538,8 +636,41 @@ describe("projectab.buffer reentrancy guard", function()
     vim.fn.delete(tmp_root, "rf")
   end)
 
-  -- TODO: Add test for empty tab closure when unnamed buffer is replaced
-  -- This requires proper vim.schedule execution in test environment
+  it("routing_toggle toggles the suspended state", function()
+    buffer.resume()
+    assert.is_true(buffer.routing_toggle())
+    assert.is_false(buffer.routing_toggle())
+    buffer.resume()
+  end)
+
+  it("aborts recursive BufEnter cascades due to is_routing lock", function()
+    -- This test triggers the lock by overriding allocate_buffer_to_tab temporarily
+    -- to invoke handle_buf_enter inside itself.
+    local orig_alloc = buffer.allocate_buffer_to_tab
+    local called_count = 0
+    buffer.allocate_buffer_to_tab = function(...)
+      called_count = called_count + 1
+      buffer.handle_buf_enter(1) -- Attempt recursion
+      return orig_alloc(...)
+    end
+
+    local tmp_root = vim.fn.tempname()
+    vim.fn.mkdir(tmp_root, "p")
+    tmp_root = vim.uv.fs_realpath(tmp_root) or tmp_root
+    vim.fn.mkdir(tmp_root .. "/proj/.git", "p")
+
+    local bufnr = vim.fn.bufadd(tmp_root .. "/proj/file.txt")
+    vim.fn.bufload(bufnr)
+    vim.bo[bufnr].buflisted = true
+
+    buffer.handle_buf_enter(bufnr)
+
+    -- Ensure it only successfully entered the allocation routing ONCE.
+    assert.are.equal(1, called_count)
+
+    buffer.allocate_buffer_to_tab = orig_alloc
+    vim.fn.delete(tmp_root, "rf")
+  end)
 end)
 
 describe("projectab.buffer resolve_project_root_from_path (deepest root wins)", function()

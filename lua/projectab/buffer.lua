@@ -282,6 +282,89 @@ end
 
 --- Cleanup misplaced buffers based on "1 project = 1 tab" rule.
 --- Called after session restore (SessionLoadPost, VimEnter) to fix buffers
+--- Fix hidden buffers that are cached in M._tab_buffers under the wrong tab.
+--- These are buffers that were never visible in a window
+--- but end up in the wrong tab's visibility cache via on_tab_leave.
+--- @private
+function M._clean_misplaced_cache_buffers()
+  for tab_id, bufs in pairs(M._tab_buffers) do
+    local tab_project = state.get_project(tab_id)
+    log.debug(string.format("P3: tab_id=%d tab_project=%s #bufs=%d", tab_id, tostring(tab_project), #bufs))
+    if tab_project then
+      local kept_bufs = {}
+      for _, bufnr in ipairs(bufs) do
+        local is_valid = vim.api.nvim_buf_is_valid(bufnr)
+        local buftype = is_valid and vim.bo[bufnr].buftype or "N/A"
+        log.debug(string.format("P3: bufnr=%d valid=%s buftype=%s", bufnr, tostring(is_valid), buftype))
+        if is_valid and buftype == "" then
+          local buf_project = M.resolve_project_root(bufnr)
+          log.debug(
+            string.format(
+              "P3: bufnr=%d buf_project=%s tab_project=%s",
+              bufnr,
+              tostring(buf_project),
+              tostring(tab_project)
+            )
+          )
+          if buf_project and buf_project ~= tab_project then
+            local target_tab_id = state.get_tab(buf_project)
+            log.debug(
+              string.format(
+                "P3: bufnr=%d MISPLACED -> target_tab_id=%s errant_tab_id=%d",
+                bufnr,
+                tostring(target_tab_id),
+                tab_id
+              )
+            )
+            if target_tab_id and target_tab_id ~= tab_id then
+              M._tab_buffers[target_tab_id] = M._tab_buffers[target_tab_id] or {}
+              local exists = false
+              for _, existing_buf in ipairs(M._tab_buffers[target_tab_id]) do
+                if existing_buf == bufnr then
+                  exists = true
+                  break
+                end
+              end
+              if not exists then
+                table.insert(M._tab_buffers[target_tab_id], bufnr)
+              end
+              -- Hide the buffer from the errant tab's view immediately
+              vim.api.nvim_set_option_value("buflisted", false, { buf = bufnr })
+              log.debug(
+                string.format(
+                  "P3: moved hidden bufnr=%d from tab=%d cache to tab=%d cache",
+                  bufnr,
+                  tab_id,
+                  target_tab_id
+                )
+              )
+            else
+              log.debug(
+                string.format(
+                  "P3: bufnr=%d no valid target_tab (target=%s) => kept in tab=%d",
+                  bufnr,
+                  tostring(target_tab_id),
+                  tab_id
+                )
+              )
+              table.insert(kept_bufs, bufnr)
+            end
+          else
+            log.debug(string.format("P3: bufnr=%d project matches or nil => kept in tab=%d", bufnr, tab_id))
+            table.insert(kept_bufs, bufnr)
+          end
+        else
+          log.debug(string.format("P3: bufnr=%d invalid or special => kept in tab=%d", bufnr, tab_id))
+          table.insert(kept_bufs, bufnr)
+        end
+      end
+      M._tab_buffers[tab_id] = kept_bufs
+    end
+  end
+end
+
+--- Move buffers that are in the wrong tab's window to their correct tab.
+--- Scans all currently open windows and detects file buffers
 --- that ended up in the wrong tab.
 ---
 --- Uses a 2-pass approach for safety:
@@ -330,6 +413,9 @@ function M.clean_misplaced_buffers()
   end
 
   if #moves == 0 then
+    -- Even with no window-level moves, hidden buffers in _tab_buffers may still be misplaced.
+    -- Fall through to Pass 3.
+    M._clean_misplaced_cache_buffers()
     return
   end
 
@@ -411,6 +497,9 @@ function M.clean_misplaced_buffers()
     log.debug_ctx("cleanup: error during misplaced buffer cleanup: " .. tostring(restore_err))
     notify("Error during misplaced buffer cleanup: " .. tostring(restore_err), vim.log.levels.ERROR)
   end
+
+  -- Pass 3: always run, even when there were no window-level moves.
+  M._clean_misplaced_cache_buffers()
 end
 
 -- ============================================================================
