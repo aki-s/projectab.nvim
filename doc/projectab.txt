@@ -67,7 +67,7 @@ With options: >lua
       },
     },
     debug = {
-      file   = false,   -- write logs to stdpath("cache")/projectab.log
+      file   = false,   -- write logs to stdpath("cache")/projectab/projectab.log (symlink)
       notify = false,   -- show logs via vim.notify
     },
     integrations = {
@@ -129,7 +129,8 @@ All options live under the table passed to `setup()`.
 
                                                           *projectab-config-debug*
 `debug.file` (boolean)
-  Write debug logs to `stdpath("cache")/projectab.log`. Default: `false`
+  Write debug logs to `stdpath("cache")/projectab/projectab.log` (symlink).
+  Default: `false`
 
 `debug.notify` (boolean)
   Show debug messages via `vim.notify`. Default: `false`

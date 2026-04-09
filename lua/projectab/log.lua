@@ -21,6 +21,33 @@ local function get_caller_info(level)
   return src, line
 end
 
+local __log_path = nil
+
+--- Get or initialize the log file path.
+--- @return string
+local function get_log_path()
+  if __log_path then
+    return __log_path
+  end
+
+  local cache_dir = vim.fn.stdpath("cache") .. "/projectab"
+  if vim.fn.isdirectory(cache_dir) == 0 then
+    vim.fn.mkdir(cache_dir, "p")
+  end
+
+  local ts = os.date("%Y-%m-%dT%H-%M-%S")
+  local filename = string.format("projectab.log.%s.log", ts)
+  __log_path = cache_dir .. "/" .. filename
+  local symlink = cache_dir .. "/projectab.log"
+
+  -- Update symlink: remove existing one and create new link.
+  -- Use absolute path for the target to ensure it works regardless of CWD.
+  os.remove(symlink)
+  vim.uv.fs_symlink(__log_path, symlink)
+
+  return __log_path
+end
+
 --- Append msg to a log file
 --- @param src string The caller source file
 --- @param line number The caller line number
@@ -29,7 +56,7 @@ end
 local function write_log(src, line, lvl, msg)
   local ts = os.date("%Y-%m-%d %H:%M:%S")
   local line_str = string.format("[%s] [%5s] %15s:%d %s\n", ts, lvl, src, line, msg)
-  local log_file = vim.fn.stdpath("cache") .. "/projectab.log"
+  local log_file = get_log_path()
   local file = io.open(log_file, "a")
   if file then
     file:write(line_str)

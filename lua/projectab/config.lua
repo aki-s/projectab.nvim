@@ -5,7 +5,7 @@
 local M = {}
 
 --- @class ProjectabDebugConfig
---- @field file boolean Write debug logs to stdpath("cache")/projectab.log
+--- @field file boolean Write debug logs to stdpath("cache")/projectab/projectab.log (symlink)
 --- @field notify boolean Show debug logs via vim.notify
 
 --- @class ProjectabPersistence

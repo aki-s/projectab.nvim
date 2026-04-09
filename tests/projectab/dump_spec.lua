@@ -84,10 +84,30 @@ describe("projectab.dump", function()
     end
   end)
 
-  it("output path is under stdpath('cache')", function()
+  it("output path is under stdpath('cache')/projectab", function()
     local path = dump.dump()
-    local cache_dir = vim.fn.stdpath("cache")
-    assert.is_truthy(path:sub(1, #cache_dir) == cache_dir, "Expected dump path under cache dir, got: " .. path)
+    local expected_dir = vim.fn.stdpath("cache") .. "/projectab"
+    assert.is_truthy(
+      path:sub(1, #expected_dir) == expected_dir,
+      "Expected dump path under projectab cache dir, got: " .. path
+    )
+  end)
+
+  it("creates a timestamped file and a symlink", function()
+    local path = dump.dump()
+    local cache_dir = vim.fn.stdpath("cache") .. "/projectab"
+    local symlink = cache_dir .. "/projectab_dump.txt"
+
+    -- Verify the returned path is timestamped
+    assert.is_truthy(path:match("projectab_dump%.txt%.%d%d%d%d%-%d%d%-%d%dT%d%d%-%d%d%-%d%d%.txt$"))
+
+    -- Verify symlink exists and points to the right file
+    local stat = vim.uv.fs_lstat(symlink)
+    assert.is_not_nil(stat, "Symlink should exist")
+    assert.is_equal("link", stat.type)
+
+    local target = vim.uv.fs_readlink(symlink)
+    assert.is_equal(path, target)
   end)
 
   it("reflects current state.project_to_tab in output", function()

@@ -154,8 +154,15 @@ function M.dump()
 
   local output = table.concat(sections, "\n")
 
-  local cache_dir = vim.fn.stdpath("cache")
-  local output_path = cache_dir .. "/projectab_dump.txt"
+  local cache_dir = vim.fn.stdpath("cache") .. "/projectab"
+  if vim.fn.isdirectory(cache_dir) == 0 then
+    vim.fn.mkdir(cache_dir, "p")
+  end
+
+  local ts = os.date("%Y-%m-%dT%H-%M-%S")
+  local filename = string.format("projectab_dump.txt.%s.txt", ts)
+  local output_path = cache_dir .. "/" .. filename
+  local symlink = cache_dir .. "/projectab_dump.txt"
 
   local f, err = io.open(output_path, "w")
   if not f then
@@ -164,6 +171,10 @@ function M.dump()
   end
   f:write(output)
   f:close()
+
+  -- Update symlink: remove existing one and create new link.
+  os.remove(symlink)
+  vim.uv.fs_symlink(output_path, symlink)
 
   vim.notify("[projectab] state dumped to: " .. output_path, vim.log.levels.INFO)
   return output_path

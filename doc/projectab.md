@@ -59,7 +59,7 @@ require("projectab").setup({
 
   -- Debug logging
   debug = {
-    file = false,   -- Write to stdpath("cache")/projectab.log
+    file = false,   -- Write to stdpath("cache")/projectab/projectab.log (symlink)
     notify = false, -- Show via vim.notify
   },
 
