@@ -508,8 +508,21 @@ end
 
 --- Cache for tab-local buffer visibility.
 --- Tracks which buffers are listed in which tab.
+---
+--- `M._tab_buffers` is currently exposed as a module-level field
+---   primarily to allow unit tests to set up and inspect state directly
+---   (e.g. `buffer._tab_buffers[tab] = {...}`).
+---   `cleanup.lua` also reads it directly on tab close.
+---
 --- @type table<integer, integer[]> Array of valid listed buffers per tab ID
 M._tab_buffers = {}
+
+--- Return a read-only copy of the tab-buffer visibility cache.
+--- Intended for use by dump.lua (and tests that only need to inspect state).
+--- @return table<integer, integer[]>
+function M._get_tab_buffers()
+  return vim.deepcopy(M._tab_buffers)
+end
 
 --- Get all valid, listed buffers
 --- @return integer[]

@@ -162,4 +162,10 @@ function M._cache_size()
   return count
 end
 
+--- Return a copy of the root detection cache (for debugging/testing).
+--- @return table<string, string|false>
+function M._get_root_cache()
+  return vim.deepcopy(root_cache)
+end
+
 return M

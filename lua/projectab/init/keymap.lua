@@ -18,6 +18,14 @@ function M.setup()
   -- Default mapped to <Plug> so users can just disable it by unmapping or mapping something else
   vim.keymap.set(
     "n",
+    "<Plug>(projectab-dump)",
+    "<Cmd>Projectab ps-dump<CR>",
+    { desc = "Projectab: Dump internal state for debugging" }
+  )
+  safe_map("n", "<leader><TAB>D", "<Plug>(projectab-dump)", { desc = "Projectab: Dump internal state for debugging" })
+
+  vim.keymap.set(
+    "n",
     "<Plug>(projectab-reorganize)",
     "<Cmd>Projectab ps-reorganize<CR>",
     { desc = "Projectab: Reorganize tabs and buffers" }

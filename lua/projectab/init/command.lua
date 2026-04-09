@@ -6,6 +6,7 @@ local M = {}
 
 local CMD_PROJECTS_CLEAR_ROOT_CACHE = "ps-clear-root-cache"
 local CMD_PROJECTS_CLOSE_EMPTY_TAB = "ps-close-empty-tab"
+local CMD_PROJECTS_DUMP = "ps-dump"
 local CMD_PROJECTS_LIST = "ps-list"
 local CMD_PROJECTS_QUIT = "ps-quit"
 local CMD_PROJECTS_REORGANIZE = "ps-reorganize"
@@ -36,6 +37,8 @@ function M.setup()
       local cleanup = require("projectab.cleanup")
       local count = cleanup.projects_close_empty_tab()
       notify(string.format("Closed %d empty tab(s)", count), vim.log.levels.INFO)
+    elseif subcmd == CMD_PROJECTS_DUMP then
+      require("projectab.dump").dump()
     elseif subcmd == CMD_PROJECTS_LIST then
       local projects = state.list_projects()
       if next(projects) then
@@ -106,6 +109,7 @@ function M.setup()
           -- sort command in alphabetically
           CMD_PROJECTS_CLEAR_ROOT_CACHE,
           CMD_PROJECTS_CLOSE_EMPTY_TAB,
+          CMD_PROJECTS_DUMP,
           CMD_PROJECTS_LIST,
           CMD_PROJECTS_QUIT,
           CMD_PROJECTS_REORGANIZE,
@@ -132,6 +136,7 @@ function M.setup()
           -- sort command in alphabetically
           CMD_PROJECTS_CLEAR_ROOT_CACHE,
           CMD_PROJECTS_CLOSE_EMPTY_TAB,
+          CMD_PROJECTS_DUMP,
           CMD_PROJECTS_LIST,
           CMD_PROJECTS_QUIT,
           CMD_PROJECTS_REORGANIZE,
