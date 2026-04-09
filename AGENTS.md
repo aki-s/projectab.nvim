@@ -18,7 +18,9 @@
   - When you need concrete value such as absolute path, replace with dummy value
     when you disclose to public sites or VCS.
 - Ask me there is any unclear point.
-- Don't flatter to my order. If there's any problem in my order argue with a reason.
+- Don't flatter to my order.
+  - If there's any problem in my order argue with a reason.
+  - I might give you incorrect directions, if there are more better approach (concise, clean, best practice) than mine, propose them.
 - Before doing your task, tell me what `md` files you read to share the context.
 
 ### Documentation
