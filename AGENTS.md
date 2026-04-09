@@ -36,8 +36,13 @@
   - Read [neovim.github.io](https://github.com/neovim/neovim.github.io/).
   - Read files under `:echo $VIMRUNTIME/doc/`
 - Run `make lint-fix` to format code after all edit has finished.
-- Extend existing method if it is appropriate. If any existing method provides no value (a.k.a not working for utility method or extension point
+- Extend existing function if it is appropriate. If any existing function provides no value (a.k.a not working for utility function or extension point
   for client of this extension), you can delete it.
+- A variable not expected to be exposed using `require`-ed MUST be declared with `local`.
+- A module variable (not `local` variable) name starting with `_` is expected to be used by this plugin itself.
+- A function not expected to be exposed to plugin users MUST begin with ``_` (Python like convention).
+  - A function name starting with `_` is expected to be used by this plugin itself.
+  - A function name starting with `__` is expected to be used withing the file containing the function.
 
 #### Unittest
 
