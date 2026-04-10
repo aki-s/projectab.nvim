@@ -27,7 +27,7 @@ What actually happened. Include error messages if any (`:messages`).
 - **Neovim version**: (output of `nvim --version`)
 - **OS**: (e.g., macOS 14, Ubuntu 22.04)
 - **projectab.nvim version/commit**:
-- **Relevant plugins** (e.g., scope.nvim, persistence.nvim, bufferline.nvim):
+- **Relevant plugins** (e.g. persistence.nvim, bufferline.nvim):
 
 ## Minimal Config to Reproduce
 
@@ -38,7 +38,7 @@ require("projectab").setup({})
 
 ## Debug Log
 
-Enable debug logging and paste the output:
+1. Enable debug logging, reproduce the bug and paste the output:
 
 ```lua
 require("projectab").setup({
@@ -46,4 +46,11 @@ require("projectab").setup({
 })
 ```
 
-Log file: `vim.fn.stdpath("cache") .. "/projectab.log"`
+`~/.cache/nvim/projectab.log` is written. Paste the content.
+
+(`~/.cache` is `vim.fn.stdpath("cache")`)
+
+
+2. `:Projectab ps-dump`
+
+`~/.cache/nvim/projectab_dump.txt` is created. Paste the content.
