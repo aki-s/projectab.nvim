@@ -1,69 +1,68 @@
-## Agents
+```markdown
+# AGENTS.md
 
-### Terminology
+## Terminology
 
-- `<TMP>` is a temporary rule which could proceed each order. If set, then it might be deleted in near future.
+- `<TMP>` is a temporary rule which may precede each order. If set, it might be deleted in the near future.
 
-### Overall
+## General Rules
 
-- You must answer and judge based on facts (source code, official document).
-- Don't estimate, but check facts (source code, official document) before action.
-  - Tell me the grounds for your action.
-- Before doing dangerous actions
-  (e.x. loss of data by deleting a file which contains uncommitted changes.
-   reading credential files), ask permission.
-- File editor is not limited to you. You could observe any changes while you are working.
-- If you generated a file and it should be distributed for the other remote developers, add only what you have modified to VCS.
-  - MUST: This repository is disclosed to public. So don't disclose any private or security information to public sites or VCS.
-  - When you need concrete value such as absolute path, replace with dummy value
-    when you disclose to public sites or VCS.
-- Ask me there is any unclear point.
-- Don't flatter to my order.
-  - If there's any problem in my order argue with a reason.
-  - I might give you incorrect directions, if there are more better approach (concise, clean, best practice) than mine, propose them.
-- Before doing your task, tell me what `md` files you read to share the context.
+- Answer and judge based on facts (source code, official documentation). Do not estimate — verify before acting.
+  - Always state the grounds for your actions.
+- Before performing dangerous actions
+  (e.g., loss of data by deleting a file which contains uncommitted changes, reading credential files), ask for permission.
+- Be aware that files may be edited by others while you are working.
+- If you generated a file and it should be distributed to other remote developers, add only what you have modified to VCS.
+  - MUST: This repository is public. Never disclose private or security information to public sites or VCS.
+  - When you need a concrete value such as an absolute path, replace it with a dummy value before disclosing to public sites or VCS.
+- Ask if there is any unclear point.
+- Do not flatter.
+  - If there is any problem with an instruction, argue with a reason.
+  - If there is a better approach (more concise, cleaner, best practice) than the one given, propose it.
+- Before starting any task, tell me which `md` files you read to share context.
+- Report inconsistency if any.
 
-### Documentation
+## Documentation
 
-- Write documents in English.
-- Use Mermaid to make dependency or architecture clear for human.
-- Don't forget to update ./doc/projectab.md and ./doc/projectab.txt to be consistent with source code.
-  - You are allwed to change doc at the last phase of task, because the change policy could change during task.
+- Write all documents in English.
+- Use Mermaid to make dependencies or architecture clear for humans.
+- Don't forget to update `./doc/projectab.md` and `./doc/projectab.txt` to be consistent with the source code.
+  - You are allowed to update docs at the last phase of a task, because the change policy could change during the task.
 
-### Code
+## Code
 
-- Don't go ahead to writing code without agreed plan.
-- While you are editing code, I might change some code. Ask me if edit conflict has happened.
-- To understand [neovim](https://github.com/neovim/neovim),
+- Do not write code without an agreed plan.
+- While you are editing code, others may change some code. Ask if an edit conflict has occurred.
+- To understand [neovim](https://github.com/neovim/neovim):
   - Read [neovim.github.io](https://github.com/neovim/neovim.github.io/).
   - Read files under `:echo $VIMRUNTIME/doc/`
-- Run `make lint-fix` to format code after all edit has finished.
-- Extend existing function if it is appropriate. If any existing function provides no value (a.k.a not working for utility function or extension point
-  for client of this extension), you can delete it.
-- A variable not expected to be exposed using `require`-ed MUST be declared with `local`.
-- A module variable (not `local` variable) name starting with `_` is expected to be used by this plugin itself.
-- A function not expected to be exposed to plugin users MUST begin with ``_` (Python like convention).
+- Run `make lint-fix` to format code after all edits are finished.
+- Extend existing functions when appropriate. If any existing function provides no value (e.g., a non-working utility function or an unused extension point for clients of this extension), you can delete it.
+- A variable not expected to be exposed via `require` MUST be declared with `local`.
+- A module variable (non-`local`) name starting with `_` is expected to be used by this plugin internally.
+- A function not expected to be exposed to plugin users MUST begin with `_` (Python-like convention).
   - A function name starting with `_` is expected to be used by this plugin itself.
-  - A function name starting with `__` is expected to be used withing the file containing the function.
+  - A function name starting with `__` is expected to be used only within the file containing the function.
 
-#### Unittest
+### Unittest
 
-- Add unittest for the function you created.
-- When test requires function as a helper only to be used in unittest and it need to be at module, proceed the name with `_`.
+- Add unittests for every module function you create.
+- Check unittests ends successfully.
+- When a test requires a helper function only used in unittests but placed at module level, prefix the name with `_`.
 
-#### Architecture & Design
+### Architecture & Design
 
 - **Separation of Concerns**: Each module should have a single, well-defined responsibility.
   - Don't add ad-hoc fixes. Think about which module should own the functionality.
   - Before implementing, consider: "Does this belong in this module, or should it be in a separate module?"
 - **Module Boundaries**: Respect module boundaries and avoid mixing concerns.
-  - `state.lua`: Project-to-tab mapping state management only
-  - `buffer.lua`: Buffer routing logic only
-  - `session.lua`: Session persistence only
-  - `detect.lua`: Project root detection only
-  - `init.lua`: Plugin setup, autocmds, and user commands only
+  - `buffer.lua` — buffer routing logic only
+  - `detect.lua` — project root detection only
+  - `init.lua` — plugin setup, autocmds, and user commands only
+  - `session.lua` — session persistence only
+  - `state.lua` — project-to-tab mapping state management only
 
-#### Type Annotations (LuaLS)
+### Type Annotations (LuaLS)
 
 All Lua source files must include [LuaLS](https://luals.github.io/) type annotations for IDE support (completion, hover, diagnostics).
 
@@ -89,7 +88,6 @@ All Lua source files must include [LuaLS](https://luals.github.io/) type annotat
   because their type definitions are outside this project.
 - **`@class` for data structures**: Define `@class` + `@field` for non-trivial table shapes
   (e.g., `ProjectabState`, `ProjectabConfig`). Place the definition close to where the table is created.
-  - `@field` should be sorted in alphabetical order if there's no specific reason.
-
+  - `@field` should be sorted in alphabetical order if there is no specific reason otherwise.
 - **`.luarc.json`**: The project root contains `.luarc.json` for LuaLS workspace settings.
   Keep `diagnostics.globals` updated when new test helpers or globals are introduced.
