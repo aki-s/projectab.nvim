@@ -350,10 +350,10 @@ describe("projectab.buffer unit (allocation logic)", function()
     assert.are.equal(2, allocated_tab)
   end)
 
-  it("hides the buffer from scope.nvim caching during tab jump by toggling buflisted", function()
-    -- scope.nvim works by hooking TabLeave to cache all listed buffers in the outgoing tab.
+  it("hides the buffer from visibility caching during tab jump by toggling buflisted", function()
+    -- Our on_tab_leave hook (bound to TabLeave) caches all listed buffers in the outgoing tab.
     -- We verify that when allocate_buffer_to_tab jumps tabs, buflisted is strictly false,
-    -- tricking TabLeave into ignoring the buffer.
+    -- tricking the hook into ignoring the buffer.
     state.register("/project/A", 2)
 
     local was_listed_during_jump = nil
@@ -381,7 +381,7 @@ describe("projectab.buffer unit (allocation logic)", function()
 
     buffer.allocate_buffer_to_tab(10, "/project/A", 1, 2)
 
-    -- It must be FALSE during the jump to avoid scope.nvim caching
+    -- It must be FALSE during the jump to avoid incorrect visibility caching
     assert.is_false(was_listed_during_jump)
     -- It must be restored to TRUE after the routine finishes
     assert.is_true(buflisted_state)
