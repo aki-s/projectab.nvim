@@ -59,16 +59,20 @@ local function collect_tab_buffers(tab_id)
     end
   end
 
-  -- Also collect listed buffers that are loaded but not visible in any window.
-  -- These are buffers the user had open (e.g., in a buffer list) but not displayed.
-  for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-    if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].buflisted and vim.bo[bufnr].buftype == "" then
+  -- Also collect buffers that are loaded but not visible in any window.
+  -- Priority: use the visibility cache (_tab_buffers) which correctly tracks
+  -- background-tab buffers even when they are hidden (buflisted=false).
+  -- Fallback: scan buflisted buffers for the active tab case (e.g. tests where
+  -- on_tab_leave autocmd has not fired and _tab_buffers is empty).
+  local cached = buffer_module._tab_buffers[tab_id] or {}
+  local extra_bufs = #cached > 0 and cached or vim.api.nvim_list_bufs()
+  local use_cache = #cached > 0
+  for _, bufnr in ipairs(extra_bufs) do
+    if vim.api.nvim_buf_is_valid(bufnr) and vim.bo[bufnr].buftype == "" and (use_cache or vim.bo[bufnr].buflisted) then
       local name = vim.api.nvim_buf_get_name(bufnr)
       if name ~= "" then
         name = vim.fn.fnamemodify(name, ":p")
         if not seen[name] then
-          -- Check if this buffer belongs to this project tab.
-          -- Use buffer routing logic instead of string prefix to properly handle nested projects.
           if project_root and buffer_module.resolve_project_root_from_path(name) == project_root then
             seen[name] = true
             table.insert(buffers, name)
