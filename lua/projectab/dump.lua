@@ -159,7 +159,9 @@ function M.dump()
     vim.fn.mkdir(cache_dir, "p")
   end
 
-  local ts = os.date("%Y-%m-%dT%H-%M-%S")
+  local ts_base = os.date("%Y-%m-%dT%H-%M-%S")
+  local ms = math.floor((vim.loop.hrtime() / 1e6) % 1000)
+  local ts = ts_base .. string.format(".%03d", ms)
   local filename = string.format("projectab_dump.txt.%s.txt", ts)
   local output_path = cache_dir .. "/" .. filename
   local symlink = cache_dir .. "/projectab_dump.txt"

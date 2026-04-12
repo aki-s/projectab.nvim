@@ -99,7 +99,7 @@ describe("projectab.dump", function()
     local symlink = cache_dir .. "/projectab_dump.txt"
 
     -- Verify the returned path is timestamped
-    assert.is_truthy(path:match("projectab_dump%.txt%.%d%d%d%d%-%d%d%-%d%dT%d%d%-%d%d%-%d%d%.txt$"))
+    assert.is_truthy(path:match("projectab_dump%.txt%.%d%d%d%d%-%d%d%-%d%dT%d%d%-%d%d%-%d%d%.%d%d%d%.txt$"))
 
     -- Verify symlink exists and points to the right file
     local stat = vim.uv.fs_lstat(symlink)
