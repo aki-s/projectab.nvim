@@ -61,8 +61,24 @@ function M.open()
 
   table.insert(lines, "")
   table.insert(lines, "  Commands:")
+
+  table.insert(lines, "    [R] Restore projects")
+  keymaps["R"] = function()
+    local session = require("projectab.session")
+    local sessions = session.list({ limit = 10 })
+
+    local dirs = {}
+    for _, root in ipairs(sessions) do
+      table.insert(dirs, root)
+    end
+
+    local ret = {}
+    for _, dir in ipairs(dirs) do
+      session.project_restore(dir)
+    end
+  end
+
   table.insert(lines, "    [p] Pick Project")
-  -- TODO: select oproject or open project from session.
   keymaps["p"] = pick.project_pick
 
   table.insert(lines, "    [n] New empty tab")
