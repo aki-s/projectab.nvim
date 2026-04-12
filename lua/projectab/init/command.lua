@@ -15,6 +15,7 @@ local CMD_PROJECTS_SAVE = "ps-save"
 local CMD_PROJECTS_TOGGLE_ROUTING = "ps-toggle-routing"
 local CMD_PROJECT_BNEXT = "p-bnext"
 local CMD_PROJECT_BPREV = "p-bprev"
+local CMD_PROJECT_CLONE_WINS = "p-clone-wins"
 local CMD_PROJECT_CLOSE = "p-close"
 local CMD_PROJECT_OPEN = "p-open"
 local CMD_PROJECT_PICK = "p-pick"
@@ -84,6 +85,8 @@ function M.setup()
       end
     elseif subcmd == CMD_PROJECT_PICK then
       require("projectab.ui.pick").project_pick()
+    elseif subcmd == CMD_PROJECT_CLONE_WINS then
+      require("projectab.experiments.neovide").tab_clone_wins()
     elseif subcmd == CMD_PROJECT_RESTORE then
       local path = cmd_opts.fargs[2]
       if path then
@@ -105,7 +108,7 @@ function M.setup()
     else
       notify(
         string.format(
-          "Subcommands: %s | %s | %s | %s | %s | %s | %s | %s| %s | %s | %s <path> | %s | %s <path> | %s | %s",
+          "Subcommands: %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s <path> | %s | %s <path> | %s | %s",
           -- sort command in alphabetically
           CMD_PROJECTS_CLEAR_ROOT_CACHE,
           CMD_PROJECTS_CLOSE_EMPTY_TAB,
@@ -119,6 +122,7 @@ function M.setup()
           CMD_PROJECT_BNEXT,
           CMD_PROJECT_BPREV,
           CMD_PROJECT_CLOSE,
+          CMD_PROJECT_CLONE_WINS,
           CMD_PROJECT_OPEN, -- arg
           CMD_PROJECT_PICK,
           CMD_PROJECT_RESTORE, -- arg
@@ -145,6 +149,7 @@ function M.setup()
           CMD_PROJECTS_TOGGLE_ROUTING,
           CMD_PROJECT_BNEXT,
           CMD_PROJECT_BPREV,
+          CMD_PROJECT_CLONE_WINS,
           CMD_PROJECT_CLOSE,
           CMD_PROJECT_OPEN,
           CMD_PROJECT_PICK,

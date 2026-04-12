@@ -18,6 +18,14 @@ function M.setup()
   -- Default mapped to <Plug> so users can just disable it by unmapping or mapping something else
   vim.keymap.set(
     "n",
+    "<Plug>(projectab-cache-clear)",
+    "<Cmd>Projectab ps-clear-root-cache<CR>",
+    { desc = "Projectab: Clear cache" }
+  )
+  safe_map("n", "<leader><TAB>c", "<Plug>(projectab-cache-clear)", { desc = "Projectab: Clear cache" })
+
+  vim.keymap.set(
+    "n",
     "<Plug>(projectab-dump)",
     "<Cmd>Projectab ps-dump<CR>",
     { desc = "Projectab: Dump internal state for debugging" }
@@ -26,19 +34,19 @@ function M.setup()
 
   vim.keymap.set(
     "n",
-    "<Plug>(projectab-reorganize)",
-    "<Cmd>Projectab ps-reorganize<CR>",
-    { desc = "Projectab: Reorganize tabs and buffers" }
-  )
-  safe_map("n", "<leader><TAB>F", "<Plug>(projectab-reorganize)", { desc = "Projectab: Reorganize tabs and buffers" })
-
-  vim.keymap.set(
-    "n",
     "<Plug>(projectab-quit)",
     "<Cmd>Projectab ps-quit<CR>",
     { desc = "Projectab: Save all projects and quit" }
   )
   safe_map("n", "<leader><TAB>Q", "<Plug>(projectab-quit)", { desc = "Projectab: Save all projects and quit" })
+
+  vim.keymap.set(
+    "n",
+    "<Plug>(projectab-reorganize)",
+    "<Cmd>Projectab ps-reorganize<CR>",
+    { desc = "Projectab: Reorganize tabs and buffers" }
+  )
+  safe_map("n", "<leader><TAB>F", "<Plug>(projectab-reorganize)", { desc = "Projectab: Reorganize tabs and buffers" })
 
   vim.keymap.set(
     "n",
@@ -69,11 +77,11 @@ function M.setup()
 
   vim.keymap.set(
     "n",
-    "<Plug>(projectab-cache-clear)",
-    "<Cmd>Projectab ps-clear-root-cache<CR>",
-    { desc = "Projectab: Clear cache" }
+    "<Plug>(projectab-clone-wins)",
+    "<Cmd>Projectab p-clone-wins<CR>",
+    { desc = "Projectab: Clone windows in new Neovide" }
   )
-  safe_map("n", "<leader><TAB>c", "<Plug>(projectab-cache-clear)", { desc = "Projectab: Clear cache" })
+  safe_map("n", "<leader><TAB>W", "<Plug>(projectab-clone-wins", { desc = "Projectab: Clone windows in new Neovide" })
 
   vim.keymap.set("n", "<Plug>(projectab-list)", "<Cmd>Projectab ps-list<CR>", { desc = "Projectab: List projects" })
   safe_map("n", "<leader><TAB>l", "<Plug>(projectab-list)", { desc = "Projectab: List projects" })
