@@ -53,21 +53,30 @@ describe("projectab.ui.pick", function()
     assert.are.equal("Projectab: Select project", select_calls[1].opts.prompt)
   end)
 
-  it("includes known projects in the list", function()
+  it("override defaultPickerActions", function()
     -- Create real tabs to use as valid tab handles
     local tab1 = vim.api.nvim_get_current_tabpage()
     vim.cmd("tabnew")
     local tab2 = vim.api.nvim_get_current_tabpage()
     vim.cmd("tabfirst")
 
-    state.register("/tmp/projectA", tab1)
-    state.register("/tmp/projectB", tab2)
-
-    pick.project_pick()
+    pick.project_pick({
+      actions = {
+        function()
+          return pick.make_tab_item("/tmp/projectA", tab1)
+        end,
+        function()
+          return pick.make_tab_item("/tmp/projectB", tab2)
+        end,
+        function()
+          return pick.make_dir_item()
+        end,
+      },
+    })
 
     local items = select_calls[1].items
-    -- At minimum: 2 projects + "Open project using Projectab..." + "📂 Open directory..."
-    assert.is_true(#items >= 4, "Expected at least 4 items, got " .. #items)
+    vim.notify(vim.inspect(items))
+    assert.is_true(#items == 3, "Expected at 3 items, got " .. #items)
 
     -- Check that project labels are present
     local labels_str = table.concat(items, "|")
