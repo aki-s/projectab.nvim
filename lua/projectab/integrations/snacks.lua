@@ -58,7 +58,7 @@ function M.dashboard_section(opts)
     end
 
     local ret = {}
-    for i, dir in ipairs(dirs) do
+    for _, dir in ipairs(dirs) do
       ret[#ret + 1] = {
         file = dir,
         icon = "directory",
@@ -66,7 +66,6 @@ function M.dashboard_section(opts)
           if opts.action then
             return opts.action(dir)
           end
-          -- TODO: If project is already opened, do nothing.
           session.project_restore(dir)
         end,
         autokey = true,
