@@ -287,6 +287,7 @@ function M.projects_restore(opts)
   local file_path = persistence.get_persistence_path()
   local data = persistence.load_data(file_path)
   local restored = 0
+  log.debug_ctx("projects_restore: " .. vim.inspect(data))
 
   -- Suspend buffer routing during bulk restore to prevent tab-spawning cascades
   local buffer = require("projectab.buffer")
@@ -294,6 +295,7 @@ function M.projects_restore(opts)
 
   local ok, err = pcall(function()
     for _, root in ipairs(data.sessions) do
+      log.debug_ctx("session: restore " .. root)
       if restored >= limit then
         break
       end
