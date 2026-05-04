@@ -8,16 +8,17 @@ local M = {}
 --- @field file boolean Write debug logs to stdpath("cache")/projectab/projectab.log (symlink)
 --- @field notify boolean Show debug logs via vim.notify
 
---- @class ProjectabConfigPersistence
---- @field dir string|nil Override data directory (default: stdpath("data") .. "/projectab")
---- @field enabled boolean Enable persistence (save/restore project states)
+--- @class ProjectabConfigIntegrations
+--- @field bufferline ProjectabConfigBufferline
+--- @field project_nvim boolean Use project.nvim API for root detection (fallback)
+--- @field snacks ProjectabConfigSnacks
 
---- @class ProjectabConfigDashboard
---- @field enabled boolean Enable the standalone startup dashboard
---- @field header string[] Lines of text for the header
+--- @class ProjectabConfigBufferline
+--- @field enabled boolean Update bufferline.nvim groups on tab enter-
 
---- @class ProjectabConfigUi
---- @field dashboard ProjectabConfigDashboard
+--- @class ProjectabConfigSnacks
+--- @field enabled boolean Use snacks.nvim for project picking integration
+--- @field pickerProjectsOpts table|nil Extra options forwarded to snacks.picker.projects() (e.g. recent, max_depth, dev)
 
 --- @class ProjectabConfigProject
 --- @field root_markers string[] Patterns to detect project root directories
@@ -26,30 +27,37 @@ local M = {}
 --- @field directory_picker_func fun(opts: {prompt: string, default?: string, completion?: string | (fun(input: string): string[])}, callback: fun(input: string?))
 -- https://neovim.io/doc/user/lua/#vim.ui.input()
 
---- @class ProjectabConfigSnacks
---- @field enabled boolean Use snacks.nvim for project picking integration
---- @field pickerProjectsOpts table|nil Extra options forwarded to snacks.picker.projects() (e.g. recent, max_depth, dev)
+--- @class ProjectabConfigPersistence
+--- @field dir string|nil Override data directory (default: stdpath("data") .. "/projectab")
+--- @field enabled boolean Enable persistence (save/restore project states)
 
---- @class ProjectabConfigBufferline
---- @field enabled boolean Update bufferline.nvim groups on tab enter-
+--- @class ProjectabConfigUi
+--- @field dashboard ProjectabConfigDashboard
 
---- @class ProjectabConfigIntegrations
---- @field bufferline ProjectabConfigBufferline
---- @field project_nvim boolean Use project.nvim API for root detection (fallback)
---- @field snacks ProjectabConfigSnacks
+--- @class ProjectabConfigDashboard
+--- @field enabled boolean Enable the standalone startup dashboard
+--- @field header string[] Lines of text for the header
 
 --- @class ProjectabConfig
---- @field ui ProjectabConfigUi
---- @field project ProjectabConfigProject
 --- @field debug ProjectabConfigDebug
 --- @field integrations ProjectabConfigIntegrations
+--- @field project ProjectabConfigProject
+--- @field ui ProjectabConfigUi
 
 --- @type ProjectabConfig
 local defaults = {
-  ui = {
-    dashboard = {
+  debug = {
+    file = false,
+    notify = false,
+  },
+  integrations = {
+    bufferline = {
       enabled = false,
-      header = { "Projectab" },
+    },
+    project_nvim = false,
+    snacks = {
+      enabled = false,
+      pickerProjectsOpts = {},
     },
   },
   project = {
@@ -85,23 +93,15 @@ local defaults = {
     },
     excluded_root_dirs = {},
     persistence = {
-      enabled = true,
       dir = nil, -- defaults to stdpath("data") .. "/projectab"
+      enabled = true,
     },
     directory_picker_func = vim.ui.input,
   },
-  debug = {
-    file = false,
-    notify = false,
-  },
-  integrations = {
-    project_nvim = false,
-    bufferline = {
+  ui = {
+    dashboard = {
       enabled = false,
-    },
-    snacks = {
-      enabled = false,
-      pickerProjectsOpts = {},
+      header = { "Projectab" },
     },
   },
 }
