@@ -4,45 +4,45 @@
 --- @field values ProjectabConfig
 local M = {}
 
---- @class ProjectabDebugConfig
+--- @class ProjectabConfigDebug
 --- @field file boolean Write debug logs to stdpath("cache")/projectab/projectab.log (symlink)
 --- @field notify boolean Show debug logs via vim.notify
 
---- @class ProjectabPersistence
+--- @class ProjectabConfigPersistence
 --- @field dir string|nil Override data directory (default: stdpath("data") .. "/projectab")
 --- @field enabled boolean Enable persistence (save/restore project states)
 
---- @class ProjectabDashboardConfig
+--- @class ProjectabConfigDashboard
 --- @field enabled boolean Enable the standalone startup dashboard
 --- @field header string[] Lines of text for the header
 
---- @class ProjectabUiConfig
---- @field dashboard ProjectabDashboardConfig
+--- @class ProjectabConfigUi
+--- @field dashboard ProjectabConfigDashboard
 
---- @class ProjectabProjectConfig
+--- @class ProjectabConfigProject
 --- @field root_markers string[] Patterns to detect project root directories
 --- @field excluded_root_dirs string[] Directory paths to exclude from detection
---- @field persistence ProjectabPersistence
+--- @field persistence ProjectabConfigPersistence
 --- @field directory_picker_func fun(opts: {prompt: string, default?: string, completion?: string | (fun(input: string): string[])}, callback: fun(input: string?))
 -- https://neovim.io/doc/user/lua/#vim.ui.input()
 
---- @class ProjectabSnacksConfig
+--- @class ProjectabConfigSnacks
 --- @field enabled boolean Use snacks.nvim for project picking integration
 --- @field pickerProjectsOpts table|nil Extra options forwarded to snacks.picker.projects() (e.g. recent, max_depth, dev)
 
---- @class ProjectabBufferlineConfig
+--- @class ProjectabConfigBufferline
 --- @field enabled boolean Update bufferline.nvim groups on tab enter-
 
---- @class ProjectabIntegrations
---- @field bufferline ProjectabBufferlineConfig
+--- @class ProjectabConfigIntegrations
+--- @field bufferline ProjectabConfigBufferline
 --- @field project_nvim boolean Use project.nvim API for root detection (fallback)
---- @field snacks ProjectabSnacksConfig
+--- @field snacks ProjectabConfigSnacks
 
 --- @class ProjectabConfig
---- @field ui ProjectabUiConfig
---- @field project ProjectabProjectConfig
---- @field debug ProjectabDebugConfig
---- @field integrations ProjectabIntegrations
+--- @field ui ProjectabConfigUi
+--- @field project ProjectabConfigProject
+--- @field debug ProjectabConfigDebug
+--- @field integrations ProjectabConfigIntegrations
 
 --- @type ProjectabConfig
 local defaults = {
