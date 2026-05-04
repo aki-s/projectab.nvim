@@ -166,17 +166,18 @@ function M.setup()
   -- ======================================================================
   -- VimLeavePre -> VimLeave
   -- ======================================================================
-  -- Save all project states on VimLeavePre (before exit).
-  if config.values.project.persistence.enabled then
-    vim.api.nvim_create_autocmd("VimLeavePre", {
-      group = augroup,
-      callback = function(_)
-        log.debug_ctx("autocmd/VimLeavePre")
+  -- Save all project states on VimLeavePre (before exit) if enabled.
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    group = augroup,
+    callback = function(_)
+      log.debug_ctx("autocmd/VimLeavePre")
+      if config.values.project.persistence.enabled then
+        log.debug_ctx("overwrite persistence file because `config.values.project.persistence.enabled` is true")
         local session = require("projectab.session")
         session.projects_save()
-      end,
-    })
-  end
+      end
+    end,
+  })
 end
 
 return M
