@@ -119,10 +119,11 @@ end
 
 --- Load persistence.json.
 --- Returns a default structure if the file does not exist.
+--- @param file_path string fully qualified file path where data is saved
 --- @return ProjectabPersistence
-function M.load_data()
+function M.load_data(file_path)
   --- @type ProjectabPersistence|nil
-  local data = M.read_json(M.get_persistence_path())
+  local data = M.read_json(file_path)
   if data and data.version then
     return data
   end
@@ -130,10 +131,11 @@ function M.load_data()
 end
 
 --- Save persistence.json.
+--- @param file_path fully qualified file path where data is saved
 --- @param data ProjectabPersistence
 --- @return boolean success
-function M.save_data(data)
-  return M.write_json(M.get_persistence_path(), data)
+function M.save_data(file_path, data)
+  return M.write_json(file_path, data)
 end
 
 --- Load per-project state from its JSON file.

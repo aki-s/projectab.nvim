@@ -196,7 +196,8 @@ end
 --- Intended to be called on VimLeavePre or manually.
 function M.projects_save()
   local projects = state.list_projects()
-  local data = persistence.load_data()
+  local file_path = persistence.get_persistence_path()
+  local data = persistence.load_data(file_path)
 
   local new_sessions = {}
   for root, tab_id in pairs(projects) do
@@ -204,9 +205,8 @@ function M.projects_save()
     table.insert(new_sessions, root)
   end
   data.sessions = new_sessions
-
-  persistence.save_data(data)
-  log.debug_ctx("session: save_all complete")
+  persistence.save_data(file_path, data)
+  log.debug_ctx("session: save_all complete at " .. file_path)
 end
 
 --- Restore a single project into a new tab.
@@ -284,7 +284,8 @@ end
 function M.projects_restore(opts)
   opts = opts or { limit = 50 }
   local limit = opts.limit
-  local data = persistence.load_data()
+  local file_path = persistence.get_persistence_path()
+  local data = persistence.load_data(file_path)
   local restored = 0
 
   -- Suspend buffer routing during bulk restore to prevent tab-spawning cascades

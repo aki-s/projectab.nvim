@@ -93,16 +93,18 @@ describe("projectab.persistence", function()
 
   describe("persistence data", function()
     it("loads default when no file exists", function()
-      local d = persistence.load_data()
+      local path = test_dir .. "/persistence.json"
+      local d = persistence.load_data(path)
       assert.are.equal(1, d.version)
       assert.are.same({}, d.sessions)
     end)
 
     it("saves and loads data", function()
+      local path = test_dir .. "/persistence.json"
       local d = { version = 1, sessions = { "/a", "/b" } }
-      persistence.save_data(d)
+      persistence.save_data(path, d)
 
-      local loaded = persistence.load_data()
+      local loaded = persistence.load_data(path)
       assert.are.same({ "/a", "/b" }, loaded.sessions)
     end)
   end)
