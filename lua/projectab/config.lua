@@ -20,6 +20,9 @@ local M = {}
 --- @field enabled boolean Use snacks.nvim for project picking integration
 --- @field pickerProjectsOpts table|nil Extra options forwarded to snacks.picker.projects() (e.g. recent, max_depth, dev)
 
+--- @class ProjectabConfigKeymapConfig
+--- @field try_preset boolean try to use preset if true. This flag is not cannot ensure all preset keys are set, because it depends on the order of key declaration.
+
 --- @class ProjectabConfigProject
 --- @field root_markers string[] Patterns to detect project root directories
 --- @field excluded_root_dirs string[] Directory paths to exclude from detection
@@ -41,6 +44,7 @@ local M = {}
 --- @class ProjectabConfig
 --- @field debug ProjectabConfigDebug
 --- @field integrations ProjectabConfigIntegrations
+--- @field keymap ProjectabConfigKeymapConfig
 --- @field project ProjectabConfigProject
 --- @field ui ProjectabConfigUi
 
@@ -59,6 +63,9 @@ local defaults = {
       enabled = false,
       pickerProjectsOpts = {},
     },
+  },
+  keymap = {
+    try_preset = false, -- Give users a option if they want to try preset keymap.
   },
   project = {
     root_markers = {

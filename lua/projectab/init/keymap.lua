@@ -2,115 +2,121 @@
 --- @class ProjectabInitKeymap
 local M = {}
 
---- Register keymaps
----
---- keys are bound in ASCII code table.
-function M.setup()
-  -- Helper to set keymaps only if not already mapped by the user
-  local function safe_map(mode, lhs, rhs, map_opts)
-    local existing = vim.fn.maparg(lhs, mode)
-    if existing == "" then
-      vim.keymap.set(mode, lhs, rhs, map_opts)
-    end
+--- @param cfg ProjectabConfigKeymapConfig
+function M.setup(cfg)
+  -- Declare <Plug> mappings for LazyVim or other framework users
+  -- Default mapped to <Plug> so users can just disable it by unmapping or mapping something else
+  local presetDefs = M.presetKeyDefs()
+  for _, d in pairs(presetDefs) do
+    vim.keymap.set("n", d.plug, d.cmd, d.opts)
   end
 
-  -- <Plug> mappings for LazyVim or other framework users
-  -- Default mapped to <Plug> so users can just disable it by unmapping or mapping something else
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-ps-clear-root-cache)",
-    "<Cmd>Projectab ps-clear-root-cache<CR>",
-    { desc = "Projectab: Clear cache" }
-  )
-  safe_map("n", "<leader><TAB>c", "<Plug>(projectab-ps-clear-root-cache)", { desc = "Projectab: Clear cache" })
+  -- NOTE:
+  -- keymap defined at the end wins.
+  -- This fact means declaring 'nifty' mapping at each plugin side
+  -- is not handy for user if each plugin declare by itself.
+  -- To resolve this problem, defining all keymaps at single point is necessary.
+  --
+  -- Define keymap for consolation below.
+  if cfg.try_preset then
+    for _, d in pairs(presetDefs) do
+      vim.keymap.set("n", d.key, d.plug, d.opts)
+    end
+  end
+end
 
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-ps-dump)",
-    "<Cmd>Projectab ps-dump<CR>",
-    { desc = "Projectab: Dump internal state for debugging" }
-  )
-  safe_map(
-    "n",
-    "<leader><TAB>D",
-    "<Plug>(projectab-ps-dump)",
-    { desc = "Projectab: Dump internal state for debugging" }
-  )
+---@class ProjectabWhichKeyOpts: vim.keymap.set.Opts
+---@field desc? string
 
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-ps-quit)",
-    "<Cmd>Projectab ps-quit<CR>",
-    { desc = "Projectab: Save all projects and quit" }
-  )
-  safe_map("n", "<leader><TAB>Q", "<Plug>(projectab-ps-quit)", { desc = "Projectab: Save all projects and quit" })
+--- @class ProjectabPresetKeyDef
+--- @field key string
+--- @field plug string
+--- @field cmd string
+--- @field opts ProjectabWhichKeyOpts
 
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-ps-reorganize)",
-    "<Cmd>Projectab ps-reorganize<CR>",
-    { desc = "Projectab: Reorganize tabs and buffers" }
-  )
-  safe_map(
-    "n",
-    "<leader><TAB>F",
-    "<Plug>(projectab-ps-reorganize)",
-    { desc = "Projectab: Reorganize tabs and buffers" }
-  )
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-ps-restore)",
-    "<Cmd>Projectab ps-restore<CR>",
-    { desc = "Projectab: Restore all projects" }
-  )
-  safe_map("n", "<leader><TAB>R", "<Plug>(projectab-ps-restore)", { desc = "Projectab: Restore all projects" })
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-ps-save)",
-    "<Cmd>Projectab ps-save<CR>",
-    { desc = "Projectab: Save all projects" }
-  )
-  safe_map("n", "<leader><TAB>S", "<Plug>(projectab-ps-save)", { desc = "Projectab: Save all projects" })
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-p-bnext)",
-    "<Cmd>Projectab p-bnext<CR>",
-    { desc = "Projectab: Next buffer in project" }
-  )
-  safe_map("n", "<leader><TAB>]", "<Plug>(projectab-p-bnext)", { desc = "Projectab: Next buffer in project" })
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-p-bprev)",
-    "<Cmd>Projectab p-bprev<CR>",
-    { desc = "Projectab: Previous buffer in project" }
-  )
-  safe_map("n", "<leader><TAB>[", "<Plug>(projectab-p-bprev)", { desc = "Projectab: Previous buffer in project" })
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-p-clone-wins)",
-    "<Cmd>Projectab p-clone-wins<CR>",
-    { desc = "Projectab: Clone windows in new Neovide" }
-  )
-  safe_map("n", "<leader><TAB>W", "<Plug>(projectab-p-clone-wins", { desc = "Projectab: Clone windows in new Neovide" })
-
-  vim.keymap.set("n", "<Plug>(projectab-ps-list)", "<Cmd>Projectab ps-list<CR>", { desc = "Projectab: List projects" })
-  safe_map("n", "<leader><TAB>l", "<Plug>(projectab-ps-list)", { desc = "Projectab: List projects" })
-
-  vim.keymap.set("n", "<Plug>(projectab-p-pick)", "<Cmd>Projectab p-pick<CR>", { desc = "Projectab: Pick project" })
-  safe_map("n", "<leader><TAB>p", "<Plug>(projectab-p-pick)", { desc = "Projectab: Pick project" })
-
-  vim.keymap.set(
-    "n",
-    "<Plug>(projectab-p-save)",
-    "<Cmd>Projectab p-save<CR>",
-    { desc = "Projectab: Save current project" }
-  )
-  safe_map("n", "<leader><TAB>s", "<Plug>(projectab-p-save)", { desc = "Projectab: Save current project" })
+--- master table of preset key definitions
+--- @return ProjectabPresetKeyDef[] defs
+function M.presetKeyDefs()
+  -- NOTE:
+  -- Some keymaps such as "<leader><Tab>l"" is set by
+  -- defined LazyVim/lua/lazyvim/config/keymaps.lua@v15.15.0
+  -- This means if you are using LazyVim, then those keys could be overridden by LazyVim.
+  --
+  -- mappings are declared in the asc order of 'plug'.
+  return {
+    {
+      key = "<leader><Tab>]",
+      plug = "<Plug>(projectab-p-bnext)",
+      cmd = "<Cmd>Projectab p-bnext<CR>",
+      opts = { desc = "Projectab: Next buffer in project" },
+    },
+    {
+      key = "<leader><Tab>[",
+      plug = "<Plug>(projectab-p-bprev)",
+      cmd = "<Cmd>Projectab p-bprev<CR>",
+      opts = { desc = "Projectab: Previous buffer in project" },
+    },
+    {
+      key = "<leader><Tab>W",
+      plug = "<Plug>(projectab-p-clone-wins)",
+      cmd = "<Cmd>Projectab p-clone-wins<CR>",
+      opts = { desc = "Projectab: Clone windows in new Neovide" },
+    },
+    {
+      key = "<leader><Tab>p",
+      plug = "<Plug>(projectab-p-pick)",
+      cmd = "<Cmd>Projectab p-pick<CR>",
+      opts = { desc = "Projectab: Pick project" },
+    },
+    {
+      key = "<leader><Tab>s",
+      plug = "<Plug>(projectab-p-save)",
+      cmd = "<Cmd>Projectab p-save<CR>",
+      opts = { desc = "Projectab: Save current project" },
+    },
+    {
+      key = "<leader><Tab>c",
+      plug = "<Plug>(projectab-ps-clear-root-cache)",
+      cmd = "<Cmd>Projectab ps-clear-root-cache<CR>",
+      opts = { desc = "Projectab: Clear cache" },
+    },
+    {
+      key = "<leader><Tab>D",
+      plug = "<Plug>(projectab-ps-dump)",
+      cmd = "<Cmd>Projectab ps-dump<CR>",
+      opts = { desc = "Projectab: Dump internal state for debugging" },
+    },
+    {
+      key = "<leader><Tab>l",
+      plug = "<Plug>(projectab-ps-list)",
+      cmd = "<Cmd>Projectab ps-list<CR>",
+      opts = { desc = "Projectab: List projects" },
+    },
+    {
+      key = "<leader><Tab>Q",
+      plug = "<Plug>(projectab-ps-quit)",
+      cmd = "<Cmd>Projectab ps-quit<CR>",
+      opts = { desc = "Projectab: Save all projects and quit" },
+    },
+    {
+      key = "<leader><Tab>O",
+      plug = "<Plug>(projectab-ps-reorganize)",
+      cmd = "<Cmd>Projectab ps-reorganize<CR>",
+      opts = { desc = "Projectab: Reorganize tabs and buffers" },
+    },
+    {
+      key = "<leader><Tab>R",
+      plug = "<Plug>(projectab-ps-restore)",
+      cmd = "<Cmd>Projectab ps-restore<CR>",
+      opts = { desc = "Projectab: Restore all projects" },
+    },
+    {
+      key = "<leader><Tab>S",
+      plug = "<Plug>(projectab-ps-save)",
+      cmd = "<Cmd>Projectab ps-save<CR>",
+      opts = { desc = "Projectab: Save all projects" },
+    },
+  }
 end
 
 return M

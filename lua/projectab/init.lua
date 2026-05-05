@@ -30,7 +30,7 @@ function M.setup(opts)
 
   require("projectab.init.autocmd").setup()
   require("projectab.init.command").setup()
-  require("projectab.init.keymap").setup()
+  require("projectab.init.keymap").setup(config.values.keymap)
 
   log.debug_ctx("setup complete")
 end

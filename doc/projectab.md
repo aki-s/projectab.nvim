@@ -31,6 +31,14 @@ require("projectab").setup({
     },
   },
 
+  -- Keymap configuration
+  keymap = {
+    -- When true, preset key→<Plug> mappings (e.g. <leader><Tab>R → <Plug>(projectab-ps-restore))
+    -- are set automatically. <Plug> mappings themselves are always registered.
+    -- Set to false (default) if you prefer to define your own key bindings.
+    try_preset = false,
+  },
+
   project = {
     -- Marker files/directories used to detect project roots.
     -- Detection uses "nearest root wins" — walks upward from the file's
@@ -85,6 +93,7 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 |--------------------------------|------------------------------------------------------|
 | `:Projectab p-bnext`           | Next listed buffer in the current project            |
 | `:Projectab p-bprev`           | Previous listed buffer in the current project        |
+| `:Projectab p-clone-wins`      | Clone windows in a new Neovide instance              |
 | `:Projectab p-close`           | Save and close the current project tab               |
 | `:Projectab p-open <path>`     | Open a project in its own tab (or switch to it)      |
 | `:Projectab p-pick`            | Interactive project picker (`vim.ui.select`)         |
@@ -97,6 +106,7 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 |----------------------------------|------------------------------------------------------|
 | `:Projectab ps-clear-root-cache` | Clear the root detection cache                       |
 | `:Projectab ps-close-empty-tab`  | Close tabs with only unnamed/empty buffers           |
+| `:Projectab ps-dump`             | Dump internal state for debugging                    |
 | `:Projectab ps-list`             | List all registered projects and their tab IDs       |
 | `:Projectab ps-quit`             | Save session state for all open projects and exit Neovim |
 | `:Projectab ps-reorganize`       | Consolidate duplicate tabs, move misplaced buffers   |
@@ -106,41 +116,44 @@ All commands are subcommands of `:Projectab`. Tab completion is supported.
 
 ## Keymaps
 
-The plugin provides `<Plug>` mappings for easier integration with frameworks like LazyVim, and provides a default fallback mapping.
+The plugin provides `<Plug>` mappings for easier integration with frameworks like LazyVim.
+`<Plug>` mappings are **always** registered. The preset key→`<Plug>` bindings are only set when `keymap.try_preset = true`.
 
 ### `<Plug>` Mappings
 
-| `<Plug>` mapping                      | Description                              |
-|---------------------------------------|------------------------------------------|
-| `<Plug>(projectab-bnext)`             | Next buffer in project                   |
-| `<Plug>(projectab-bprevious)`         | Previous buffer in project               |
-| `<Plug>(projectab-cache-clear)`       | Clear the root detection cache           |
-| `<Plug>(projectab-list)`              | List all registered projects             |
-| `<Plug>(projectab-pick)`              | Open interactive project picker          |
-| `<Plug>(projectab-quit)`              | Save all project states and quit         |
-| `<Plug>(projectab-reorganize)`        | Reorganize tabs and buffers              |
-| `<Plug>(projectab-restore)`           | Restore all project states               |
-| `<Plug>(projectab-restore-project)`   | Restore a single project                 |
-| `<Plug>(projectab-save)`              | Save all project states                  |
-| `<Plug>(projectab-save-project)`      | Save the current project state           |
+| `<Plug>` mapping                          | Command                            | Description                              |
+|-------------------------------------------|------------------------------------|-----------------------------------------|
+| `<Plug>(projectab-p-bnext)`               | `:Projectab p-bnext`               | Next buffer in project                   |
+| `<Plug>(projectab-p-bprev)`               | `:Projectab p-bprev`               | Previous buffer in project               |
+| `<Plug>(projectab-p-clone-wins)`          | `:Projectab p-clone-wins`          | Clone windows in new Neovide             |
+| `<Plug>(projectab-p-pick)`                | `:Projectab p-pick`                | Open interactive project picker          |
+| `<Plug>(projectab-p-save)`                | `:Projectab p-save`                | Save the current project state           |
+| `<Plug>(projectab-ps-clear-root-cache)`   | `:Projectab ps-clear-root-cache`   | Clear the root detection cache           |
+| `<Plug>(projectab-ps-dump)`               | `:Projectab ps-dump`               | Dump internal state for debugging        |
+| `<Plug>(projectab-ps-list)`               | `:Projectab ps-list`               | List all registered projects             |
+| `<Plug>(projectab-ps-quit)`               | `:Projectab ps-quit`               | Save all project states and quit         |
+| `<Plug>(projectab-ps-reorganize)`         | `:Projectab ps-reorganize`         | Reorganize tabs and buffers              |
+| `<Plug>(projectab-ps-restore)`            | `:Projectab ps-restore`            | Restore all project states               |
+| `<Plug>(projectab-ps-save)`               | `:Projectab ps-save`               | Save all project states                  |
 
-### Default Fallback Mappings
+### Preset Key Mappings (`keymap.try_preset = true`)
 
-| Key               | Mode | Target                              | Description                     |
-|-------------------|------|-------------------------------------|---------------------------------|
-| `<leader><TAB>F`  | n    | `<Plug>(projectab-reorganize)`      | Reorganize tabs and buffers     |
-| `<leader><TAB>R`  | n    | `<Plug>(projectab-restore)`         | Restore all project states      |
-| `<leader><TAB>S`  | n    | `<Plug>(projectab-save)`            | Save all project states         |
-| `<leader><TAB>[`  | n    | `<Plug>(projectab-bprevious)`       | Previous buffer in project      |
-| `<leader><TAB>]`  | n    | `<Plug>(projectab-bnext)`           | Next buffer in project          |
-| `<leader><TAB>c`  | n    | `<Plug>(projectab-cache-clear)`     | Clear the root detection cache  |
-| `<leader><TAB>l`  | n    | `<Plug>(projectab-list)`            | List all registered projects    |
-| `<leader><TAB>p`  | n    | `<Plug>(projectab-pick)`            | Open interactive project picker |
-| `<leader><TAB>q`  | n    | `<Plug>(projectab-quit)`            | Save all project states and quit|
-| `<leader><TAB>r`  | n    | `<Plug>(projectab-restore-project)` | Restore a single project        |
-| `<leader><TAB>s`  | n    | `<Plug>(projectab-save-project)`    | Save the current project state  |
+| Key               | Mode | Target                                    | Description                              |
+|-------------------|------|-------------------------------------------|------------------------------------------|
+| `<leader><TAB>D`  | n    | `<Plug>(projectab-ps-dump)`               | Dump internal state for debugging        |
+| `<leader><TAB>O`  | n    | `<Plug>(projectab-ps-reorganize)`         | Reorganize tabs and buffers              |
+| `<leader><TAB>Q`  | n    | `<Plug>(projectab-ps-quit)`               | Save all project states and quit         |
+| `<leader><TAB>R`  | n    | `<Plug>(projectab-ps-restore)`            | Restore all project states               |
+| `<leader><TAB>S`  | n    | `<Plug>(projectab-ps-save)`               | Save all project states                  |
+| `<leader><TAB>W`  | n    | `<Plug>(projectab-p-clone-wins)`          | Clone windows in new Neovide             |
+| `<leader><TAB>[`  | n    | `<Plug>(projectab-p-bprev)`               | Previous buffer in project               |
+| `<leader><TAB>]`  | n    | `<Plug>(projectab-p-bnext)`               | Next buffer in project                   |
+| `<leader><TAB>c`  | n    | `<Plug>(projectab-ps-clear-root-cache)`   | Clear the root detection cache           |
+| `<leader><TAB>l`  | n    | `<Plug>(projectab-ps-list)`               | List all registered projects             |
+| `<leader><TAB>p`  | n    | `<Plug>(projectab-p-pick)`                | Open interactive project picker          |
+| `<leader><TAB>s`  | n    | `<Plug>(projectab-p-save)`                | Save the current project state           |
 
-Default keymaps are only set if not already mapped by the user. If you are using a framework like LazyVim, you can map your preferred keys directly to these `<Plug>` mappings in your plugin configuration.
+Preset key mappings are only set when `keymap.try_preset = true` in `setup()`. If you are using LazyVim, use `require("projectab.integrations.lazyvim")` instead (see below).
 
 ## Public API
 
@@ -188,7 +201,7 @@ a **project picker** (`snacks.picker.projects`) and a **dashboard section**.
 ### Project Picker (`snacks.picker.projects`)
 
 When `integrations.snacks.enabled = true`, the `:Projectab p-pick` command
-and `<Plug>(projectab-pick)` keymap offer a "🍿 Open project using Snacks..."
+and `<Plug>(projectab-p-pick)` keymap offer a "🍿 Open project using Snacks..."
 option that delegates to `snacks.picker.projects`.
 
 The picker opens a fuzzy-searchable list of recent and discovered projects,
@@ -264,6 +277,36 @@ for the full section schema.
 | `limit`  | `number` | `5`     | Maximum number of projects to show               |
 | `action` | `fun(dir: string)` | `nil` | Override the item action (default: `project_restore`) |
 
+## LazyVim Integration
+
+`require("projectab.integrations.lazyvim")` provides two helpers for
+[LazyVim](https://www.lazyvim.org/) users:
+
+### `keys()` — for `lazy.nvim` plugin spec
+
+Returns all preset key definitions in LazyVim `keys` format
+(`{ lhs, rhs, desc = ... }`). Use it in your plugin spec:
+
+```lua
+-- lazy.nvim plugin spec
+{
+  "aki-s/Projectab.nvim",
+  keys = require("projectab.integrations.lazyvim").keys(),
+  opts = { --[[ ... ]] },
+}
+```
+
+### `setDefaultKeymaps()` — manual keymap registration
+
+If you prefer to register keymaps in `keymaps.lua` instead of the spec,
+call `setDefaultKeymaps()`. It sets all preset `key→<Plug>` bindings
+via `vim.keymap.set`, and warns if a `<Plug>` mapping is already in use.
+
+```lua
+-- In your LazyVim keymaps.lua
+require("projectab.integrations.lazyvim").setDefaultKeymaps()
+```
+
 ## Architecture
 
 ### Design Principles
@@ -338,6 +381,7 @@ graph TD
 
     subgraph Integrations ["integrations/ (Optional)"]
         bufferline_int["bufferline.lua (UI Groups)"]
+        lazyvim_int["lazyvim.lua (LazyVim Keymaps)"]
         project_nvim_int["project_nvim.lua (Root Detect)"]
         snacks_int["snacks.lua (Picker + Dashboard)"]
     end
@@ -345,6 +389,7 @@ graph TD
     autocmd --..-> bufferline_int
     buffer --..-> project_nvim_int
     pick --..-> snacks_int
+    lazyvim_int --> keymap
 
     bufferline_int --> state
     bufferline_int --> detect
@@ -359,7 +404,7 @@ graph TD
 | **`init.lua`** | Public entry point. Exports `setup()`, `suspend()`, `resume()`, `_get_state()`. Delegates setup to `init/` sub-modules. |
 | **`init/autocmd.lua`** | Registers autocmds: `BufEnter` (routing), `BufWinEnter` (winbar), `SessionLoadPost` (cleanup), `TabEnter` (bufferline), `VimEnter once` (startup scan + dashboard), `TabClosed` (state cleanup), `VimLeavePre` (save). |
 | **`init/command.lua`** | Registers `:Projectab` user command with all subcommands and tab-completion. |
-| **`init/keymap.lua`** | Registers `<Plug>` mappings and default fallback keymaps. |
+| **`init/keymap.lua`** | Registers `<Plug>` mappings. Preset key→`<Plug>` bindings are set when `keymap.try_preset = true`. Exposes `presetKeyDefs()` for programmatic access to the keymap table. |
 | **`state.lua`** | Bidirectional mapping (`project_to_tab` ↔ `tab_to_project`). `register()` is the **single entry point** for state mutation + tcd setting. `scan_existing_tabs()` reads tcd (priority 1) then detects from buffers (priority 2). |
 | **`buffer.lua`** | Buffer routing on `BufEnter`. Guards: `is_suspended`, `vim.g.SessionLoad`, `is_routing` (reentrancy), `buftype`. Resolves project root, allocates buffer to correct tab. `clean_misplaced_buffers()` uses 2-pass: collect then execute. |
 | **`detect.lua`** | Native project root detection. Walks upward from file directory, checking `fs_stat` for marker files. Results cached per directory. `clear_cache()` for manual invalidation. |
@@ -376,6 +421,7 @@ graph TD
 | **`ui/pick.lua`** | `vim.ui.select` project picker with session and optional snacks integration. |
 | **`integrations/project_nvim.lua`** | Optional: Uses `project.nvim` API for root detection. |
 | **`integrations/bufferline.lua`** | Optional: Dynamically groups buffers by project in bufferline on TabEnter. Uses lazy require for `buffer.lua` to avoid circular dependency. |
+| **`integrations/lazyvim.lua`** | Optional: `keys()` returns preset key definitions in LazyVim `keys` format; `setDefaultKeymaps()` registers all preset keymaps via `vim.keymap.set`. |
 | **`integrations/snacks.lua`** | Optional: `pick_new_project()` wraps `snacks.picker.projects`; `dashboard_section()` returns a snacks dashboard item generator reading Projectab session. |
 
 ### State Lifecycle
