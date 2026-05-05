@@ -64,17 +64,7 @@ function M.open()
 
   table.insert(lines, "    [R] Restore the last opened all projects")
   keymaps["R"] = function()
-    local session = require("projectab.session")
-    local sessions = session.list({ limit = 10 })
-
-    local dirs = {}
-    for _, root in ipairs(sessions) do
-      table.insert(dirs, root)
-    end
-
-    for _, dir in ipairs(dirs) do
-      session.project_restore(dir)
-    end
+    session.projects_restore()
   end
 
   table.insert(lines, "    [p] Pick Project")
