@@ -6,7 +6,14 @@ local cleanup = require("projectab.cleanup")
 
 describe("projectab.cleanup", function()
   before_each(function()
-    config.setup({ debug = { file = false, notify = false } })
+    config.setup({
+      debug = { file = false, notify = false },
+      project = {
+        persistence = {
+          dir = vim.fn.tempname(),
+        },
+      },
+    })
     state._reset()
   end)
 

@@ -101,6 +101,7 @@ function M.setup()
       if root then
         local session = require("projectab.session")
         session.project_save(root, tab_id)
+        session._project_remember_last_opened(root, tab_id)
         notify("Saved: " .. root, vim.log.levels.INFO)
       else
         notify("Current tab has no registered project", vim.log.levels.WARN)

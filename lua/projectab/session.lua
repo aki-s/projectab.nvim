@@ -169,6 +169,7 @@ function M.project_open(path, opts)
 end
 
 --- Save the state of a single project (tab).
+---
 --- @param project_root string Project root (absolute path)
 --- @param tab_id integer Tab handle
 --- @return boolean success
@@ -192,19 +193,46 @@ function M.project_save(project_root, tab_id)
   return ok
 end
 
---- Save all registered projects
---- Intended to be called on VimLeavePre or manually.
-function M.projects_save()
-  local projects = state.list_projects()
+--- prepend the project to the head of project list.
+---
+--- @param project_root string Project root (absolute path)
+--- @param tab_id integer Tab handle
+--- @return boolean success
+function M._project_remember_last_opened(project_root, tab_id)
   local file_path = persistence.get_persistence_path()
+  local data = persistence.load_data(file_path)
+
+  local target_pr = vim.fs.normalize(project_root)
+  local pj_roots = { target_pr }
+  for _, pj_root in pairs(data.projects) do
+    local pr = vim.fs.normalize(pj_root)
+    if pr ~= target_pr then
+      table.insert(pj_roots, pr)
+    end
+  end
+
+  local ok = persistence.save_data(file_path, pj_roots)
+  log.debug_ctx("")
+  return ok
+end
+
+--- Save all registered projects
+---
+--- Intended to be called on VimLeavePre or manually.
+--- @return boolean success
+function M.projects_save()
+  local file_path = persistence.get_persistence_path()
+  local projects = state.list_projects()
 
   local pj_roots = {}
   for pj_root, tab_id in pairs(projects) do
-    M.project_save(pj_root, tab_id)
-    table.insert(pj_roots, pj_root)
+    local pr = vim.fs.normalize(pj_root)
+    M.project_save(pr, tab_id)
+    table.insert(pj_roots, pr)
   end
-  persistence.save_data(file_path, pj_roots)
   log.debug_ctx("session: save_all complete at " .. file_path)
+  local ok = persistence.save_data(file_path, pj_roots)
+  return ok
 end
 
 --- Restore a single project into a new tab.
