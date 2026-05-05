@@ -9,15 +9,15 @@
 --- @class ProjectabPersistenceModule
 local M = {}
 
---- @class ProjectabPersistence
---- @field sessions string[] List of project root directories
+--- @class ProjectabPersistenceProjects
+--- @field projects string[] List of project root directories
 --- @field version number Schema version
 
 --- @class ProjectabProjectState
 --- @field active_buffer string|nil Absolute path to the last active buffer
 --- @field buffers string[] List of absolute buffer paths
 
---- @class ProjectabProjectData
+--- @class ProjectabPersistenceProjectData
 --- @field last_saved integer Timestamp of last save (UNIX time)
 --- @field root string Absolute path to project root
 --- @field state ProjectabProjectState Per-project buffer state
@@ -117,38 +117,48 @@ function M.write_json(path, data)
   return true
 end
 
+--- @return ProjectabPersistenceProjects data
+local function emptyProjectabData()
+  --- @type ProjectabPersistenceProjects
+  local data = { version = 1, projects = {} }
+  return data
+end
+
 --- Load persistence.json.
 --- Returns a default structure if the file does not exist.
 --- @param file_path string fully qualified file path where data is saved
---- @return ProjectabPersistence
+--- @return ProjectabPersistenceProjects projects
 function M.load_data(file_path)
-  --- @type ProjectabPersistence|nil
+  --- @type ProjectabPersistenceProjects|nil
   local data = M.read_json(file_path)
   if data and data.version then
     return data
   end
-  return { version = 1, sessions = {} }
+  return emptyProjectabData()
 end
 
 --- Save persistence.json.
---- @param file_path fully qualified file path where data is saved
---- @param data ProjectabPersistence
+--- @param file_path string fully qualified file path where data is saved
+--- @param projects string[]
 --- @return boolean success
-function M.save_data(file_path, data)
+function M.save_data(file_path, projects)
+  --- @type ProjectabPersistenceProjects
+  local data = emptyProjectabData()
+  data.projects = projects
   return M.write_json(file_path, data)
 end
 
 --- Load per-project state from its JSON file.
 --- Returns nil if the file does not exist.
 --- @param root string Project root (absolute path)
---- @return ProjectabProjectData|nil project_data
+--- @return ProjectabPersistenceProjectData|nil project_data
 function M.load_project(root)
   return M.read_json(M.get_project_path(root))
 end
 
 --- Save per-project state to its JSON file.
 --- @param root string Project root (absolute path)
---- @param data ProjectabProjectData Project state data
+--- @param data ProjectabPersistenceProjectData Project state data
 --- @return boolean success
 function M.save_project(root, data)
   return M.write_json(M.get_project_path(root), data)

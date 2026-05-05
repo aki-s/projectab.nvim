@@ -169,15 +169,15 @@ function M.project_open(path, opts)
 end
 
 --- Save the state of a single project (tab).
---- @param root string Project root (absolute path)
+--- @param project_root string Project root (absolute path)
 --- @param tab_id integer Tab handle
 --- @return boolean success
-function M.project_save(root, tab_id)
+function M.project_save(project_root, tab_id)
   local buffers, active_buffer = collect_tab_buffers(tab_id)
 
   local data = {
     version = 1,
-    root = root,
+    root = project_root,
     last_saved = os.time(),
     state = {
       buffers = buffers,
@@ -185,9 +185,9 @@ function M.project_save(root, tab_id)
     },
   }
 
-  local ok = persistence.save_project(root, data)
+  local ok = persistence.save_project(project_root, data)
   if ok then
-    log.debug_ctx(string.format("session: saved project root=%s buffers=%d", root, #buffers))
+    log.debug_ctx(string.format("session: saved project root=%s buffers=%d", project_root, #buffers))
   end
   return ok
 end
@@ -197,15 +197,13 @@ end
 function M.projects_save()
   local projects = state.list_projects()
   local file_path = persistence.get_persistence_path()
-  local data = persistence.load_data(file_path)
 
-  local new_sessions = {}
-  for root, tab_id in pairs(projects) do
-    M.project_save(root, tab_id)
-    table.insert(new_sessions, root)
+  local pj_roots = {}
+  for pj_root, tab_id in pairs(projects) do
+    M.project_save(pj_root, tab_id)
+    table.insert(pj_roots, pj_root)
   end
-  data.sessions = new_sessions
-  persistence.save_data(file_path, data)
+  persistence.save_data(file_path, pj_roots)
   log.debug_ctx("session: save_all complete at " .. file_path)
 end
 
@@ -288,13 +286,17 @@ function M.projects_restore(opts)
   local data = persistence.load_data(file_path)
   local restored = 0
   log.debug_ctx("projects_restore: " .. vim.inspect(data))
+  if data.version ~= 1 then
+    local msg = strings.format("schema version is incorrect: %s", file_path)
+    vim.notify(msg, vim.log.levels.ERROR)
+  end
 
   -- Suspend buffer routing during bulk restore to prevent tab-spawning cascades
   local buffer = require("projectab.buffer")
   buffer.suspend()
 
   local ok, err = pcall(function()
-    for _, root in ipairs(data.sessions) do
+    for _, root in ipairs(data.projects) do
       log.debug_ctx("session: restore " .. root)
       if restored >= limit then
         break
